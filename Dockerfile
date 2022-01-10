@@ -19,6 +19,7 @@ RUN apk add --no-cache \
 		git \
 		gnu-libiconv \
 	;
+RUN apk add --update nodejs npm
 
 # install gnu-libiconv and set LD_PRELOAD env to make iconv work fully on Alpine image.
 # see https://github.com/docker-library/php/issues/240#issuecomment-763112749

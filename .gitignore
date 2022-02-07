@@ -7,4 +7,8 @@
 /public/bundles/
 /var/
 /vendor/
+.idea
+/public/build
+.env
 ###< symfony/framework-bundle ###
+/node_modules/

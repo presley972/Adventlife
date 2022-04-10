@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello GroupController!{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+
+<div class="example-wrapper">
+    <h1>Hello {{ controller_name }}! ✅</h1>
+
+    {% for group in groups %}
+
+        <p onclick="myFunction(this)" class="titleGroup" data-href=" {{ path('subscribe_request', {'group': group.id}) }}"> {{ group.title }}</p>
+        <p> {{ group.description }}</p>
+
+    {% endfor %}
+
+    {{ form(form) }}
+    This friendly message is coming from:
+    <ul>
+        <li>Your controller at <code><a href="{{ '/srv/app/src/Controller/GroupController.php'|file_link(0) }}">src/Controller/GroupController.php</a></code></li>
+        <li>Your template at <code><a href="{{ '/srv/app/templates/group/index.html.twig'|file_link(0) }}">templates/group/index.html.twig</a></code></li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    function myFunction(group) {
+        console.log(group.getAttribute("data-href"));
+        var url = group.getAttribute("data-href");
+        fetch(url, {
+            method: "POST",
+            headers: {'Content-Type': 'application/json'},
+        }).then(res => {
+            console.log("Request complete! response:", res);
+        });
+    }
+</script>
+{% endblock %}
+

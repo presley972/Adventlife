@@ -16,5 +16,15 @@
         <li>Your controller at <code><a href="{{ '/srv/app/src/Controller/UserController.php'|file_link(0) }}">src/Controller/UserController.php</a></code></li>
         <li>Your template at <code><a href="{{ '/srv/app/templates/user/index.html.twig'|file_link(0) }}">templates/user/index.html.twig</a></code></li>
     </ul>
+    {% for user in users %}
+        <div>
+            {{ user.email }}
+        </div>
+    {% endfor %}
 </div>
+{% endblock %}
+
+{% block javascripts%}
+    {{ parent() }}
+    {{ encore_entry_script_tags('presleyTest') }}
 {% endblock %}

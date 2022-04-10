@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -31,6 +33,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'boolean')]
     private $isVerified = false;
+
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Group::class)]
+    private $ownerGroups;
+
+    #[ORM\ManyToMany(targetEntity: Group::class, mappedBy: 'members')]
+    private $groups;
+
+    #[ORM\OneToMany(mappedBy: 'subscriber', targetEntity: Subscription::class, orphanRemoval: true)]
+    private $subscriptions;
+
+    public function __construct()
+    {
+        $this->ownerGroups = new ArrayCollection();
+        $this->groups = new ArrayCollection();
+        $this->subscriptions = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -110,6 +128,97 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): self
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Group[]
+     */
+    public function getOwnerGroups(): Collection
+    {
+        return $this->ownerGroups;
+    }
+
+    public function addOwnerGroup(Group $ownerGroup): self
+    {
+        if (!$this->ownerGroups->contains($ownerGroup)) {
+            $this->ownerGroups[] = $ownerGroup;
+            $ownerGroup->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOwnerGroup(Group $ownerGroup): self
+    {
+        if ($this->ownerGroups->removeElement($ownerGroup)) {
+            // set the owning side to null (unless already changed)
+            if ($ownerGroup->getOwner() === $this) {
+                $ownerGroup->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Group[]
+     */
+    public function getGroups(): Collection
+    {
+        return $this->groups;
+    }
+
+    public function addGroup(Group $group): self
+    {
+        if (!$this->groups->contains($group)) {
+            $this->groups[] = $group;
+            $group->addMember($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroup(Group $group): self
+    {
+        if ($this->groups->removeElement($group)) {
+            $group->removeMember($this);
+        }
+
+        return $this;
+    }
+
+    public function __toString(){
+        return $this->getEmail();
+    }
+
+    /**
+     * @return Collection|Subscription[]
+     */
+    public function getSubscriptions(): Collection
+    {
+        return $this->subscriptions;
+    }
+
+    public function addSubscription(Subscription $subscription): self
+    {
+        if (!$this->subscriptions->contains($subscription)) {
+            $this->subscriptions[] = $subscription;
+            $subscription->setSubscriber($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSubscription(Subscription $subscription): self
+    {
+        if ($this->subscriptions->removeElement($subscription)) {
+            // set the owning side to null (unless already changed)
+            if ($subscription->getSubscriber() === $this) {
+                $subscription->setSubscriber(null);
+            }
+        }
 
         return $this;
     }

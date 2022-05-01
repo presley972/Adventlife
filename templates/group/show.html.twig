@@ -49,7 +49,7 @@
                         <div class="card-img-overlay">
                             <h5 class="card-title">{{ post.name }}</h5>
                             <p class="card-text">{{ post.description }}</p>
-                            <p class="card-text">{{ post.createdAt | date}}</p>
+                            <p class="card-text">{{ post.owner.email }} - {{ post.createdAt | date}}</p>
                             <a href=" {{ path('blog_post_show', {'id': post.id}) }}" class="btn btn-primary btn-subscription"> Accedez</a>
 
                         </div>

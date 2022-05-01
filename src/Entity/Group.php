@@ -35,10 +35,17 @@ class Group
     #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: Subscription::class, orphanRemoval: true)]
     private $subscriptions;
 
+    #[ORM\OneToOne(mappedBy: 'groupe', targetEntity: Image::class, cascade: ['persist', 'remove'])]
+    private $image;
+
+    #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: BlogPost::class)]
+    private $blogPosts;
+
     public function __construct()
     {
         $this->members = new ArrayCollection();
         $this->subscriptions = new ArrayCollection();
+        $this->blogPosts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -142,6 +149,63 @@ class Group
             // set the owning side to null (unless already changed)
             if ($subscription->getGroupe() === $this) {
                 $subscription->setGroupe(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getImage(): ?Image
+    {
+        return $this->image;
+    }
+
+    public function setImage(?Image $image): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($image === null && $this->image !== null) {
+            $this->image->setGroupe(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($image !== null && $image->getGroupe() !== $this) {
+            $image->setGroupe($this);
+        }
+
+        $this->image = $image;
+
+        return $this;
+    }
+    public function __toString(): string
+    {
+
+        return $this->getTitle();
+    }
+
+    /**
+     * @return Collection|BlogPost[]
+     */
+    public function getBlogPosts(): Collection
+    {
+        return $this->blogPosts;
+    }
+
+    public function addBlogPost(BlogPost $blogPost): self
+    {
+        if (!$this->blogPosts->contains($blogPost)) {
+            $this->blogPosts[] = $blogPost;
+            $blogPost->setGroupe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBlogPost(BlogPost $blogPost): self
+    {
+        if ($this->blogPosts->removeElement($blogPost)) {
+            // set the owning side to null (unless already changed)
+            if ($blogPost->getGroupe() === $this) {
+                $blogPost->setGroupe(null);
             }
         }
 

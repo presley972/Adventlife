@@ -1,4 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,700');
+// customize some Bootstrap variables
+$primary: darken(#428bca, 20%);
+
+// the ~ allows you to reference things in node_modules
+@import "~bootstrap/scss/bootstrap";
 
 $borderRadius: 1px;
 $offset: 150%;
@@ -37,7 +42,7 @@ html, body, .container, #app {
 body {
     font-family: 'Open Sans', sans-serif;
     font-size: 16px;
-    color: #fff;
+    //color: #fff;
     margin: 0 !important;
 }
 

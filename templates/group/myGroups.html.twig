@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    {% for group in groups %}
+
+        <a href="{{ path('my_groups_request', {'group': group.id}) }}">{{ group.title }}</a>
+
+    {% endfor %}
+{% endblock %}

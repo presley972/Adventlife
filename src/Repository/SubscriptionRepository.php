@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Subscription;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -47,4 +48,16 @@ class SubscriptionRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function findByGroupAndUser($user, $group){
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->innerJoin('s.groupe', 'groupe', Join::WITH, 'groupe.id = :idGroup')
+            ->innerJoin('groupe.owner', 'owner', Join::WITH, 'owner.id = :user')
+            ->setParameters(['idGroup' => $group, 'user' => $user])
+        ;
+
+        return $qb->getQuery()->getResult();
+    }
 }

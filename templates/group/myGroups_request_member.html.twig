@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+    {% for subscription in subscriptions %}
+
+        <span style="color: #1a1e21;"> {{ subscription.subscriber.email }}</span><a href="{{ path('my_groups_request_accept', {'group': group.id, 'subscription':subscription.id}) }}"> accepter</a>
+
+    {% endfor %}
+{% endblock %}

@@ -41,6 +41,9 @@ class Group
     #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: BlogPost::class)]
     private $blogPosts;
 
+    #[ORM\ManyToOne(targetEntity: Place::class, inversedBy: 'homeGroup')]
+    private $place;
+
     public function __construct()
     {
         $this->members = new ArrayCollection();
@@ -208,6 +211,18 @@ class Group
                 $blogPost->setGroupe(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPlace(): ?Place
+    {
+        return $this->place;
+    }
+
+    public function setPlace(?Place $place): self
+    {
+        $this->place = $place;
 
         return $this;
     }

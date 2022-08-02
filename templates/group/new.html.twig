@@ -41,8 +41,35 @@
             <h1>Create new Group</h1>
 
             {{ include('group/_form.html.twig') }}
+            <form>
+                <input
+                    name="address" placeholder="Address" type="text"
+                    autocomplete="address-line1"
+                />
+                <input
+                    name="apartment" placeholder="Apartment number" type="text"
+                    autocomplete="address-line2"
+                />
+                <input
+                    name="city" placeholder="City" type="text"
+                    autocomplete="address-level2"
+                />
+                <input
+                    name="state" placeholder="State" type="text"
+                    autocomplete="address-level1"
+                />
+                <input
+                    name="country" placeholder="Country" type="text"
+                    autocomplete="country"
+                />
+                <input
+                    name="postcode" placeholder="Postcode" type="text"
+                    autocomplete="postal-code"
+                />
+            </form>
 
-            <a href="{{ path('group_index') }}">back to list</a>        </main>
+            <a href="{{ path('group_index') }}">back to list</a>
+        </main>
     </div>
 {% endblock %}
 

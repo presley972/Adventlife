@@ -26,6 +26,21 @@
 
         {% block javascripts %}
             {{ encore_entry_script_tags('app') }}
+            <script
+                id="search-js"
+                defer
+                src="https://api.mapbox.com/search-js/v1.0.0-beta.12/web.js"
+            >
+            </script>
+            <script>
+                const script = document.getElementById('search-js');
+                script.onload = function() {
+                    mapboxsearch.autofill({
+                        accessToken: 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg'
+                    });
+                };
+            </script>
+
         {% endblock %}
     </head>
     <header>

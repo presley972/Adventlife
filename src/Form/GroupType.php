@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Group;
+use App\Entity\Place;
 use App\Entity\User;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
@@ -28,6 +29,10 @@ class GroupType extends AbstractType
             ->add('image', FileType::class,[
             'label' => false,
                 'multiple' => false,
+                'mapped' => false,
+                'required' => false
+            ])
+            ->add('place', PlaceType::class, [
                 'mapped' => false,
                 'required' => false
             ])

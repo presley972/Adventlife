@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\BlogPost;
 use App\Entity\Group;
 use App\Entity\Image;
+use App\Entity\Place;
 use App\Entity\Subscription;
 use App\Form\BlogPostType;
 use App\Form\GroupType;
@@ -47,14 +48,34 @@ class GroupController extends AbstractController
             /** @var UploadedFile $image */
             $image = $form->get('image')->getData();
             $group->setCreatedAt(new \DateTimeImmutable());
+            if ($form->get('place') !== null && $form->get('place')->getData()->getAdress() !== null){
+                $dataPlace = $form->get('place')->getData();
+                $place = new Place();
+                $place->setCreatedAt(new \DateTimeImmutable('now'));
+                $place->setAdress($dataPlace->getAdress());
+                $place->setCountry($dataPlace->getCountry());
+                $place->setZipCode($dataPlace->getZipCode());
+                $place->setLocality($dataPlace->getLocality());
+                $place->setLat($dataPlace->getLat());
+                $place->setLng($dataPlace->getLng());
+                $place->setStreet($dataPlace->getStreet());
+                $place->setStreetNumber($dataPlace->getStreetNumber());
+                $place->setPlaceId($dataPlace->getPlaceId());
+                $place->setAreaRegion($dataPlace->getAreaRegion());
+                $place->addHomeGroup($group);
+                $group->setPlace($place);
+                $entityManager->persist($place);
 
+            }
+            if ($image !== null ){
+                $fichier = $fileUploader->upload($image);
+                // On crée l'image dans la base de données
+                $img = new Image();
+                $img->setImage($fichier);
+                $group->setImage($img);
 
-            $fichier = $fileUploader->upload($image);
+            }
 
-            // On crée l'image dans la base de données
-            $img = new Image();
-            $img->setImage($fichier);
-            $group->setImage($img);
             $entityManager->persist($group);
             $entityManager->flush();
             return $this->redirectToRoute('group_index', [], Response::HTTP_SEE_OTHER);

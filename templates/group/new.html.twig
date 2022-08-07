@@ -41,6 +41,7 @@
             <h1>Create new Group</h1>
 
             {{ include('group/_form.html.twig') }}
+{#
             <form>
                 <input
                     name="address" placeholder="Address" type="text"
@@ -67,6 +68,7 @@
                     autocomplete="postal-code"
                 />
             </form>
+#}
 
             <a href="{{ path('group_index') }}">back to list</a>
         </main>

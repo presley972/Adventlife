@@ -3,6 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+        <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet">
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
         {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
@@ -26,6 +28,9 @@
 
         {% block javascripts %}
             {{ encore_entry_script_tags('app') }}
+            <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js"></script>
+            <script src="https://unpkg.com/@mapbox/mapbox-sdk/umd/mapbox-sdk.min.js"></script>
+
             <script
                 id="search-js"
                 defer
@@ -37,7 +42,37 @@
                 script.onload = function() {
                     mapboxsearch.autofill({
                         accessToken: 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg'
+                    }).addEventListener('retrieve', (event) => {
+                        const featureCollection = event.detail;
+                        console.log(featureCollection.features[0].properties);
+                        const lng = featureCollection.features[0].geometry.coordinates[0];
+                        const lat = featureCollection.features[0].geometry.coordinates[1];
+                        const streetNumber = featureCollection.features[0].properties.address_number;
+                        const id = featureCollection.features[0].properties.id;
+                        const street = featureCollection.features[0].properties.street;
+                        const address_level2 = featureCollection.features[0].properties.address_level2;
+                        const address_level1 = featureCollection.features[0].properties.address_level1;
+                        const country = featureCollection.features[0].properties.country;
+                        const postcode = featureCollection.features[0].properties.postcode;
+                        console.log(lng);
+                        console.log(lat);
+                        console.log(streetNumber);
+                        console.log(id);
+                        console.log(street);
+
+                        $(document).find('#group_place_lat').val(lat);
+                        $(document).find('#group_place_lng').val(lng);
+                        $(document).find('#group_place_country').val(country);
+                        $(document).find('#group_place_zipCode').val(postcode);
+                        $(document).find('#group_place_locality').val(address_level2);
+                        $(document).find('#group_place_areaRegion').val(address_level1);
+                        $(document).find('#group_place_street').val(street);
+                        $(document).find('#group_place_streetNumber').val(streetNumber);
+                        $(document).find('#group_place_placeId').val(id);
+                        const inputEl = event.target;
+// ...
                     });
+
                 };
             </script>
 

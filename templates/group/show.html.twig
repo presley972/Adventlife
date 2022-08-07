@@ -5,7 +5,7 @@
     <div
         id="intro-example"
         class="p-5 text-center bg-image"
-        style="background-image: url('https://www.actu-environnement.com/images/illustrations/news/32794_large.jpg');"
+        style="background-image: url('{{ asset('uploads/' ~ group.image.image) }}');"
     >
         <div class="mask" style="background-color: rgba(0, 0, 0, 0.7);">
             <div class="d-flex justify-content-center align-items-center h-100">
@@ -36,12 +36,22 @@
 
 {% block body %}
 
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; left: 0; width: 100%;height: 20% }
+    </style>
+
     <a href="{{ path('group_blog_post_new', { 'id': group.id}) }}">ajouter un post</a>
 
     <div class="container">
         <main>
             <h1>List des Post</h1>
+            {#{{ dump( group.place.lat) }}
+            {{ dump( group.place.lng) }}
+            {{ dump( group.place.country) }}
+            {{ dump( group.place.locality) }}#}
 
+            <div id="map"></div>
             <div class="row row-cols-1 row-cols-md-2 g-4">
                 {% for post in group.blogPosts %}
                     <div class="card bg-dark text-white">
@@ -74,4 +84,38 @@
     <a href="{{ path('group_edit', {'id': group.id}) }}">edit</a>
 
     {{ include('group/_delete_form.html.twig') }}
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
+        const mapboxClient = mapboxSdk({ accessToken: mapboxgl.accessToken });
+        mapboxClient.geocoding
+            .forwardGeocode({
+                query: '{{ group.place.adress ~ ' ' ~ group.place.locality ~ ' ' ~ group.place.country }}',
+                autocomplete: false,
+                limit: 1
+            })
+            .send()
+            .then((response) => {
+                if (
+                    !response ||
+                    !response.body ||
+                    !response.body.features ||
+                    !response.body.features.length
+                ) {
+                    console.error('Invalid response:');
+                    console.error(response);
+                    return;
+                }
+                const feature = response.body.features[0];
+
+                const map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/streets-v11',
+                    center: feature.center,
+                    zoom: 10
+                });
+
+// Create a marker and add it to the map.
+                new mapboxgl.Marker().setLngLat(['{{ group.place.lng }}', '{{ group.place.lat }}']).setPopup(new mapboxgl.Popup().setHTML("<h1>{{ group.place.adress }}</h1>")).addTo(map);
+            });
+    </script>
 {% endblock %}

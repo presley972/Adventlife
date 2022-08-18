@@ -85,6 +85,7 @@
 
     {{ include('group/_delete_form.html.twig') }}
     <script>
+        {% if group.place %}
         mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
         const mapboxClient = mapboxSdk({ accessToken: mapboxgl.accessToken });
         mapboxClient.geocoding
@@ -117,5 +118,7 @@
 // Create a marker and add it to the map.
                 new mapboxgl.Marker().setLngLat(['{{ group.place.lng }}', '{{ group.place.lat }}']).setPopup(new mapboxgl.Popup().setHTML("<h1>{{ group.place.adress }}</h1>")).addTo(map);
             });
+        {% endif %}
+
     </script>
 {% endblock %}

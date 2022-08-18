@@ -35,7 +35,10 @@
 {% endblock %}
 
 {% block body %}
-
+    <style>
+        #map { position: absolute;    width: 100%;
+            height: 50%;}
+    </style>
     <div class="container">
         <main>
             <h1>List des Groups</h1>
@@ -59,6 +62,42 @@
             </div>
         </main>
     </div>
+    <div id="map"></div>
+    <script>
+        mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
+        const map = new mapboxgl.Map({
+            container: 'map', // container ID
+            style: 'mapbox://styles/mapbox/streets-v11', // style URL
+            center: [-24, 42], // starting center in [lng, lat]
+            zoom: 1, // starting zoom
+            projection: 'globe' // display map as a 3D globe
+        });
+
+        map.on('style.load', () => {
+            map.setFog({}); // Set the default atmosphere style
+        });
+
+        // Add geolocate control to the map.
+        map.addControl(
+            new mapboxgl.GeolocateControl({
+                positionOptions: {
+                    enableHighAccuracy: true
+                },
+// When active the map will receive updates to the device's location as it changes.
+                trackUserLocation: true,
+// Draw an arrow next to the location dot to indicate which direction the device is heading.
+                showUserHeading: true
+            })
+        );
+        {% for group in groups %}
+        {% if group.place %}
+        new mapboxgl.Marker().setLngLat(['{{ group.place.lng }}', '{{ group.place.lat }}']).setPopup(new mapboxgl.Popup().setHTML("<h1>{{ group.place.adress }}</h1>")).addTo(map);
+
+        {% endif %}
+
+        {% endfor %}
+    </script>
+
 {% endblock %}
 
 {% block javascripts %}

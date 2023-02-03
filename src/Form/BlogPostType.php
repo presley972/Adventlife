@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\BlogPost;
+use FOS\CKEditorBundle\Form\Type\CKEditorType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -14,7 +15,7 @@ class BlogPostType extends AbstractType
     {
         $builder
             ->add('name')
-            ->add('description')
+            ->add('description', CKEditorType::class,array('input_sync' => true))
             ->add('images', FileType::class,[
                 'label' => false,
                 'multiple' => true,

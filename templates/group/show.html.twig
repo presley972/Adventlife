@@ -5,13 +5,15 @@
     <div
         id="intro-example"
         class="p-5 text-center bg-image"
+        {% if group.image is defined and group.image is not null and group.image.image is not null %}
         style="background-image: url('{{ asset('uploads/' ~ group.image.image) }}');"
+        {% endif %}
     >
         <div class="mask" style="background-color: rgba(0, 0, 0, 0.7);">
             <div class="d-flex justify-content-center align-items-center h-100">
                 <div class="text-white">
                     <h1 class="mb-3">{{ group.title }}</h1>
-                    <h5 class="mb-4">{{ group.description }}</h5>
+                    <h5 class="mb-4">{{ group.description | raw }}</h5>
                     <a
                         class="btn btn-outline-light btn-lg m-2"
                         href="https://www.youtube.com/watch?v=c9B4TPnak1A"
@@ -37,54 +39,110 @@
 {% block body %}
 
     <style>
-        body { margin: 0; padding: 0; }
-        #map { position: absolute; left: 0; width: 100%;height: 20% }
+        /* Layout Code */
+        .container {
+            margin: 0 auto;
+            min-height: 100vh;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .content {
+            flex: 1;
+            display: flex;
+        }
+        .main {
+            flex: 1;
+            padding: 0 20px;
+        }
+        .aside {
+            width: 260px;
+        }
+
+        /* Content Code */
+        .header h1 {
+            margin: 0;
+            font-size: 1.75rem;
+            text-transform: uppercase;
+        }
+        .main h2,
+        .aside h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .main p,
+        .aside p {
+            margin: 0.75rem 0;
+        }
+        .aside,
+        .footer {
+            font-size: 0.875rem;
+        }
+        .fc-toolbar-chunk{
+            font-size: 10px;
+        }
+
+        #map { width: 260px; height: 310px; box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px; border-radius: 10px }
+        #calendrier { width: 95%; height: 400px; box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px; border-radius: 10px }
     </style>
 
     <a href="{{ path('group_blog_post_new', { 'id': group.id}) }}">ajouter un post</a>
+    <a href="{{ path('group_evenement_new', { 'id': group.id}) }}">ajouter un evenement</a>
 
     <div class="container">
-        <main>
-            <h1>List des Post</h1>
-            {#{{ dump( group.place.lat) }}
-            {{ dump( group.place.lng) }}
-            {{ dump( group.place.country) }}
-            {{ dump( group.place.locality) }}#}
+        <div class="content">
+            <aside class="aside">
+                <div id="calendrier" data-events="{{ events| json_encode }}"></div>
+            </aside>
+            <main style="flex: auto; margin: 20px;">
+                <h1>List des Post</h1>
 
-            <div id="map"></div>
-            <div class="row row-cols-1 row-cols-md-2 g-4">
-                {% for post in group.blogPosts %}
-                    <div class="card bg-dark text-white">
-                        <img src="{{ asset('uploads/' ~ post.images|first.image) }}" class="card-img" alt="...">
-                        <div class="card-img-overlay">
-                            <h5 class="card-title">{{ post.name }}</h5>
-                            <p class="card-text">{{ post.description }}</p>
-                            <p class="card-text">{{ post.owner.email }} - {{ post.createdAt | date}}</p>
-                            <a href=" {{ path('blog_post_show', {'id': post.id}) }}" class="btn btn-primary btn-subscription"> Accedez</a>
-
-                        </div>
-                    </div>
-                    {#<div class="col">
-                        <div class="card h-100">
-                            {% if group.image %}
-                                <img src="{{ asset('uploads/' ~ group.image.image) }}" class="card-img-top" alt="...">
-                            {% endif %}
+                <div class="row gy-5 ">
+                    {% for post in group.blogPosts %}
+                        <div class="card">
                             <div class="card-body">
                                 <h5 class="card-title">{{ post.name }}</h5>
-                                <p class="card-text">{{ post.description }}</p>
+                                <p class="card-text">{{ post.description | raw}}</p>
+                                <p class="card-text"><small class="text-muted">{{ post.owner.email }} - {{ post.createdAt | date}}</small></p>
                             </div>
+                            {% for image in post.images %}
+                                {% if image is defined and image is not null    %}
+                                    <img src="{{ asset('uploads/' ~ image.image) }}" class="card-img-bottom w-100" alt="...">
+
+                                {% endif %}
+                            {% endfor %}
+
+
                         </div>
-                    </div>#}
-                {% endfor %}
-            </div>
-        </main>
+{#                        <div class="col">#}
+{#                        <div class="card h-100">#}
+{#                            {% if group.image is defined and group.image is not null and group.image.image is not null %}#}
+{#                                <img src="{{ asset('uploads/' ~ group.image.image) }}" class="card-img-top" alt="...">#}
+{#                            {% endif %}#}
+{#                            <div class="card-body">#}
+{#                                <h5 class="card-title">{{ post.name }}</h5>#}
+{#                                <p class="card-text">{{ post.description |raw }}</p>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                    </div>#}
+                    {% endfor %}
+                </div>
+            </main>
+            <aside class="aside">
+                <div id="map"></div>
+            </aside>
+        </div>
     </div>
     <a href="{{ path('group_index') }}">back to list</a>
 
     <a href="{{ path('group_edit', {'id': group.id}) }}">edit</a>
 
     {{ include('group/_delete_form.html.twig') }}
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
     <script>
+
         {% if group.place %}
         mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
         const mapboxClient = mapboxSdk({ accessToken: mapboxgl.accessToken });
@@ -119,6 +177,25 @@
                 new mapboxgl.Marker().setLngLat(['{{ group.place.lng }}', '{{ group.place.lat }}']).setPopup(new mapboxgl.Popup().setHTML("<h1>{{ group.place.adress }}</h1>")).addTo(map);
             });
         {% endif %}
+        window.onload = () => {
+            // On va chercher la div dans le HTML
+            let calendarEl = document.getElementById('calendrier');
+            let evenements = [];
+            let evenement = {};
+            {% for event in group.evenements  %}
+            evenement = {
+                "title":"{{ event.title }}",
+                "start":"{{ event.start |date('Y-m-d') }}",
+                "end":"{{ event.endAt |date('Y-m-d') }}"};
+
+            evenements.push(evenement);
+
+            {% endfor %}
+
+
+        }
 
     </script>
+
 {% endblock %}
+

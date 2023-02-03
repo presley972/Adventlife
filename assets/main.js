@@ -1,3 +1,37 @@
+import { Calendar } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
+
+document.addEventListener('DOMContentLoaded', function() {
+  var calendarEl = document.getElementById('calendrier');
+  var evenements = calendarEl.getAttribute('data-events');
+
+  evenements = JSON.parse(evenements);
+  var calendar = new Calendar(calendarEl, {
+    plugins: [ dayGridPlugin, timeGridPlugin, listPlugin ],
+    initialView: 'dayGridMonth',
+    timeZone: 'UTC',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,listWeek'
+    },
+    locale: 'fr',
+    buttonText: {
+      today:    'Aujourd\'hui',
+      month:    'Mois',
+      week:     'Semaine',
+      day:      'Jour',
+      list:     'Liste'
+    },
+    events: evenements
+  });
+
+  calendar.render();
+
+});
+
 // jQuery(function($) {
 // 	"use strict";
 // 	// Author Code Here

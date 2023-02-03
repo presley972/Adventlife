@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Group;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -47,4 +48,16 @@ class GroupRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function findForPagination()
+    {
+
+        $qb = $this->createQueryBuilder('g');
+
+        $qb
+            ->orderBy('g.createdAt', 'DESC');
+
+        return $qb->getQuery();
+
+    }
 }

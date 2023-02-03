@@ -1,37 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello GroupController!{% endblock %}
-{% block mainHeader %}
-    <div
-        id="intro-example"
-        class="p-5 text-center bg-image"
-        style="background-image: url('https://www.actu-environnement.com/images/illustrations/news/32794_large.jpg');"
-    >
-        <div class="mask" style="background-color: rgba(0, 0, 0, 0.7);">
-            <div class="d-flex justify-content-center align-items-center h-100">
-                <div class="text-white">
-                    <h1 class="mb-3">Learn Bootstrap 5 with MDB</h1>
-                    <h5 class="mb-4">Best & free guide of responsive web design</h5>
-                    <a
-                        class="btn btn-outline-light btn-lg m-2"
-                        href="https://www.youtube.com/watch?v=c9B4TPnak1A"
-                        role="button"
-                        rel="nofollow"
-                        target="_blank"
-                    >Start tutorial</a
-                    >
-                    <a
-                        class="btn btn-outline-light btn-lg m-2"
-                        href="{{ path('group_new') }}"
-                        target="_blank"
-                        role="button"
-                    >creer un group de maison</a
-                    >
-                </div>
-            </div>
-        </div>
+{% block navigationHeader %}
+    <div class="et-hero-tabs-container">
+        <a class="et-hero-tab" href="#"  data-href="{{path('group_list')}}">Liste des groupes</a>
+        <a class="et-hero-tab" href="#"  data-href="{{ path('group_new') }}">Créé un groupe</a>
+        <a class="et-hero-tab" href="#"  data-href="#tab-react">Trouver un groupe</a>
+        <span class="et-hero-tab-slider"></span>
     </div>
-
 {% endblock %}
 
 {% block body %}
@@ -40,29 +15,9 @@
             height: 50%;}
     </style>
     <div class="container">
-        <main>
-            <h1>List des Groups</h1>
 
-            <div class="row row-cols-1 row-cols-md-3 g-4">
-                {% for group in groups %}
-                    <div class="col">
-                        <div class="card h-100">
-                            {% if group.image %}
-                                <img src="{{ asset('uploads/' ~ group.image.image) }}" class="card-img-top" alt="...">
-                            {% endif %}
-                            <div class="card-body">
-                                <h5 class="card-title">{{ group.title }}</h5>
-                                <p class="card-text">{{ group.description }}</p>
-                                <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class="btn btn-primary btn-subscription"> Abonnez-vous</a>
-                                <a href=" {{ path('group_show', {'id': group.id}) }}" class="btn btn-primary btn-subscription"> Accedez</a>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </main>
     </div>
-    <div id="map"></div>
+    {#<div id="map"></div>
     <script>
         mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
         const map = new mapboxgl.Map({
@@ -96,7 +51,7 @@
         {% endif %}
 
         {% endfor %}
-    </script>
+    </script>#}
 
 {% endblock %}
 
@@ -112,6 +67,25 @@
                 console.log("Request complete! response:", res);
             });
         });
+        $( document ).ready(function() {
+            $(document).find('.et-hero-tab').first().trigger('click');
+            $(document).on('click', '.js-load-more', function (e){
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                var url = $(this).attr("data-href");
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    success: function (data) {
+                        $(document).find('.container-groups').append(data.html)
+                        $(document).find('.js-load-more').attr("data-href", "{{ path('group_list_page', {'page' : 'intToChange'}) }}");
+                        var newUrl = $(document).find('.js-load-more').attr("data-href").replace('intToChange', data.page);
+                        $(document).find('.js-load-more').attr("data-href", newUrl);
+                    }
+                });
+            })
+        });
+
     </script>
 {% endblock %}
 

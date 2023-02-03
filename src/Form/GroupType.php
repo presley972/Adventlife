@@ -26,7 +26,7 @@ class GroupType extends AbstractType
                 'class' => User::class,
                 'multiple' => true
             ])*/
-            ->add('description', CKEditorType::class)
+            ->add('description', CKEditorType::class,array('input_sync' => true))
             ->add('image', FileType::class,[
             'label' => false,
                 'multiple' => false,
@@ -37,7 +37,6 @@ class GroupType extends AbstractType
                 'mapped' => false,
                 'required' => false
             ])
-            ->add('submit', SubmitType::class)
         ;
     }
 

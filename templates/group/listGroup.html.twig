@@ -1,0 +1,81 @@
+<br>
+<br>
+<h1>List des Groups</h1>
+<div class="container">
+    <div id="map" style="width: 100%;"></div>
+
+</div>
+<div class="container-groups">
+    {% for group in groups %}
+        <div class="Card">
+            <div class="Card-image" {% if group.image %} style="background-image: url({{ asset('uploads/' ~ group.image.image) }});"{% endif %}></div>
+            <div class="Card-body">
+                <h1 class="Card-title">{{ group.title }}</h1>
+                <p class="Card-description">
+{#                    {{ group.description | raw }}#}
+                    {{ group.description|striptags|slice(0, 40) }}
+                </p>
+                <div class="card-btn-container">
+                    <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class="btn btn-light btn-success"> Abonnez-vous</a>
+                    <a href=" {{ path('group_show', {'id': group.id}) }}" class="btn btn-secondary btn-subscription"> Accedez</a>
+                </div>
+            </div>
+        </div>
+        {#<div class="col">
+            <div class="card h-100">
+                {% if group.image %}
+                    <img src="{{ asset('uploads/' ~ group.image.image) }}" class="card-img-top" alt="...">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ group.title }}</h5>
+                    <p class="card-text">{{ group.description | raw }}</p>
+                    <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class="btn btn-primary btn-subscription"> Abonnez-vous</a>
+                    <a href=" {{ path('group_show', {'id': group.id}) }}" class="btn btn-primary btn-subscription"> Accedez</a>
+                </div>
+            </div>
+        </div>#}
+    {% endfor %}
+</div>
+<div class="container">
+    <div class="row">
+        <div class="d-flex align-items-center justify-content-center">
+            <a href="#" data-href="{{ path('group_list_page', {'page' : 2}) }}" class="button js-load-more"> Load More</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
+    const map = new mapboxgl.Map({
+        container: 'map', // container ID
+        style: 'mapbox://styles/mapbox/streets-v11', // style URL
+        center: [-24, 42], // starting center in [lng, lat]
+        zoom: 1, // starting zoom
+        projection: 'globe' // display map as a 3D globe
+    });
+
+    map.on('style.load', () => {
+        map.setFog({}); // Set the default atmosphere style
+    });
+
+    // Add geolocate control to the map.
+    map.addControl(
+        new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+// When active the map will receive updates to the device's location as it changes.
+            trackUserLocation: true,
+// Draw an arrow next to the location dot to indicate which direction the device is heading.
+            showUserHeading: true
+        })
+    );
+    {% for group in groups %}
+    {% if group.place %}
+    new mapboxgl.Marker().setLngLat(['{{ group.place.lng }}', '{{ group.place.lat }}']).setPopup(new mapboxgl.Popup().setHTML("<h1>{{ group.place.adress }}</h1>")).addTo(map);
+
+    {% endif %}
+
+    {% endfor %}
+</script>
+

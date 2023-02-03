@@ -1,5 +1,6 @@
 const Encore = require('@symfony/webpack-encore');
-
+const mapboxgl = require('mapbox-gl');
+const MapboxGeocoder = require('@mapbox/mapbox-gl-geocoder');
 // Manually configure the runtime environment if not already configured yet by the "encore" command.
 // It's useful when you use tools that rely on webpack.config.js file.
 if (!Encore.isRuntimeEnvironmentConfigured()) {
@@ -21,6 +22,9 @@ Encore
      * and one CSS file (e.g. app.scss) if your JavaScript imports CSS.
      */
     .addEntry('app', './assets/app.js')
+    .addEntry('datepicker', [
+      './assets/datepicker.js'
+    ])
     .addEntry('presleyTest', './assets/controllers/presleyTest.jsx')
     // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
     .enableStimulusBridge('./assets/controllers.json')
@@ -81,5 +85,6 @@ Encore
     // uncomment if you're having problems with a jQuery plugin
     //.autoProvidejQuery()
 ;
-
+mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
+mapboxGeo = MapboxGeocoder;
 module.exports = Encore.getWebpackConfig();

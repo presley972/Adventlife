@@ -5,6 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
         <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
         <title>{% block title %}Welcome!{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
         {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
@@ -14,13 +15,13 @@
             <style>
                 /* Default height for small devices */
                 #intro-example {
-                    height: 400px;
+                    height: 200px;
                 }
 
                 /* Height for devices larger than 992px */
                 @media (min-width: 992px) {
                     #intro-example {
-                        height: 600px;
+                        /*height: 600px;*/
                     }
                 }
             </style>
@@ -30,7 +31,7 @@
             {{ encore_entry_script_tags('app') }}
             <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js"></script>
             <script src="https://unpkg.com/@mapbox/mapbox-sdk/umd/mapbox-sdk.min.js"></script>
-
+            <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
             <script
                 id="search-js"
                 defer
@@ -39,9 +40,11 @@
             </script>
             <script>
                 const script = document.getElementById('search-js');
+                mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
+
                 script.onload = function() {
                     mapboxsearch.autofill({
-                        accessToken: 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg'
+                        accessToken: mapboxgl.accessToken
                     }).addEventListener('retrieve', (event) => {
                         const featureCollection = event.detail;
                         console.log(featureCollection.features[0].properties);
@@ -74,6 +77,29 @@
                     });
 
                 };
+
+                $(document).on('click', '.et-hero-tab', function (){
+                    let url = $(this).attr('data-href');
+                    var menuSel = $(this);
+                    $.ajax({
+                        type: "POST",
+                        url: url,
+                        success: function (data) {
+                            $(document).find('.container').empty();
+                            $(document).find('.container').append(data.html);
+                            menuSel.addClass('active');
+                            let width = 0;
+                            let left = 0;
+                            if(menuSel) {
+                                width = menuSel.css('width');
+                                left = menuSel.offset().left;
+                            }
+                            $('.et-hero-tab-slider').css('width', width);
+                            $('.et-hero-tab-slider').css('left', left);
+                            console.log(data);
+                        }
+                    });
+                })
             </script>
 
         {% endblock %}
@@ -128,15 +154,43 @@
     <!-- Navbar -->
 
     <!-- Background image -->
-    {% block mainHeader %}{% endblock %}
+    {% block mainHeader %}
+        <section class="et-hero-tabs" style="background-image: linear-gradient(180deg,rgba(58,110,173,0.73) 100%,rgba(25,91,206,0.71) 100%), url('https://www.actu-environnement.com/images/illustrations/news/32794_large.jpg');">
+            <div class="first-header">
+                <div class="first-element-first-header">
+                        <span>
+                            +33 7 68 08 46 44
+                        </span>
+                </div>
+                <div class="second-element-first-header">
+                        <span>
+                            +33 7 68 08 46 44
+                        </span>
+                </div>
+                <div class="third-element-first-header">
+                    <span>
+                            +33 7 68 08 46 44
+                    </span>
+                </div>
+
+            </div>
+            <h1>STICKY SLIDER NAV</h1>
+            <h3>Sliding content with sticky tab nav</h3>
+            {% block navigationHeader %}
+
+            {% endblock %}
+
+        </section>
+    {% endblock %}
 
     <!-- Background image -->
     </header>
     <body>
     {% block body %}{% endblock %}
 
-
-    <footer class="my-5 pt-5 text-muted text-center text-small">
+    </body>
+    {% block footer %}
+        <footer id="footer" class="text-center text-small">
         <p class="mb-1">&copy; 2017–2020 Company Name</p>
         <ul class="list-inline">
             <li class="list-inline-item">
@@ -150,6 +204,5 @@
             </li>
         </ul>
     </footer>
-
-    </body>
+    {% endblock %}
 </html>

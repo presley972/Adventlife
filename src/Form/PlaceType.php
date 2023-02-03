@@ -14,8 +14,8 @@ class PlaceType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('Adress', TextType::class, [
-                'attr' => ['autocomplete' => 'street-address'],
+            ->add('Adress', HiddenType::class, [
+                'attr' => ['autocomplete' => 'street-address', 'class' => 'hiddenField'],
             ])
             ->add('lat', HiddenType::class, [
                 'attr' => ['autocomplete' => 'lat', 'class' => 'hiddenField'],

@@ -49,6 +49,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Comment::class)]
     private $comments;
 
+    #[ORM\OneToMany(mappedBy: 'created_by', targetEntity: Evenement::class)]
+    private $evenements;
+
+    #[ORM\ManyToMany(targetEntity: Evenement::class, mappedBy: 'subscriber')]
+    private $subscriber_evenements;
+
     public function __construct()
     {
         $this->ownerGroups = new ArrayCollection();
@@ -56,6 +62,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->subscriptions = new ArrayCollection();
         $this->blogPosts = new ArrayCollection();
         $this->comments = new ArrayCollection();
+        $this->evenements = new ArrayCollection();
+        $this->subscriber_evenements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -286,6 +294,63 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             if ($comment->getOwner() === $this) {
                 $comment->setOwner(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Evenement[]
+     */
+    public function getEvenements(): Collection
+    {
+        return $this->evenements;
+    }
+
+    public function addEvenement(Evenement $evenement): self
+    {
+        if (!$this->evenements->contains($evenement)) {
+            $this->evenements[] = $evenement;
+            $evenement->setCreatedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvenement(Evenement $evenement): self
+    {
+        if ($this->evenements->removeElement($evenement)) {
+            // set the owning side to null (unless already changed)
+            if ($evenement->getCreatedBy() === $this) {
+                $evenement->setCreatedBy(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Evenement[]
+     */
+    public function getSubscriberEvenements(): Collection
+    {
+        return $this->subscriber_evenements;
+    }
+
+    public function addSubscriberEvenement(Evenement $subscriberEvenement): self
+    {
+        if (!$this->subscriber_evenements->contains($subscriberEvenement)) {
+            $this->subscriber_evenements[] = $subscriberEvenement;
+            $subscriberEvenement->addSubscriber($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSubscriberEvenement(Evenement $subscriberEvenement): self
+    {
+        if ($this->subscriber_evenements->removeElement($subscriberEvenement)) {
+            $subscriberEvenement->removeSubscriber($this);
         }
 
         return $this;

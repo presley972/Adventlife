@@ -1,84 +1,97 @@
-{% extends 'base.html.twig' %}
 
-{% block title %}Hello GroupController!{% endblock %}
-{% block mainHeader %}
-    <div
-        id="intro-example"
-        class="p-5 text-center bg-image"
-        style="background-image: url('https://www.actu-environnement.com/images/illustrations/news/32794_large.jpg');"
-    >
-        <div class="mask" style="background-color: rgba(0, 0, 0, 0.7);">
-            <div class="d-flex justify-content-center align-items-center h-100">
-                <div class="text-white">
-                    <h1 class="mb-3">Learn Bootstrap 5 with MDB</h1>
-                    <h5 class="mb-4">Best & free guide of responsive web design</h5>
-                    <a
-                        class="btn btn-outline-light btn-lg m-2"
-                        href="https://www.youtube.com/watch?v=c9B4TPnak1A"
-                        role="button"
-                        rel="nofollow"
-                        target="_blank"
-                    >Start tutorial</a
-                    >
-                    <a
-                        class="btn btn-outline-light btn-lg m-2"
-                        href="https://mdbootstrap.com/docs/standard/"
-                        target="_blank"
-                        role="button"
-                    >creer un group de maison</a
-                    >
-                </div>
-            </div>
-        </div>
+<div class="add_new_group_header">
+    <h2 class="add_new_group_title">
+        Créer votre groupe
+    </h2>
+    <div class="btn_container">
+        <a class="btn back" href="{{ path('group_index') }}" style="background-color: #c92240; color: white; padding: 7px 10px; ">back to list</a>
+        <a href="#" class="btn" style="background-color: #66B1F1; color: white; padding: 7px 10px; "
+        >{{ button_label|default('Save') }}</a>
+
     </div>
 
-{% endblock %}
+</div>
 
-{% block body %}
-
-    <div class="container">
-        <main>
-            <h1>Create new Group</h1>
 
             {{ include('group/_form.html.twig') }}
-{#
-            <form>
-                <input
-                    name="address" placeholder="Address" type="text"
-                    autocomplete="address-line1"
-                />
-                <input
-                    name="apartment" placeholder="Apartment number" type="text"
-                    autocomplete="address-line2"
-                />
-                <input
-                    name="city" placeholder="City" type="text"
-                    autocomplete="address-level2"
-                />
-                <input
-                    name="state" placeholder="State" type="text"
-                    autocomplete="address-level1"
-                />
-                <input
-                    name="country" placeholder="Country" type="text"
-                    autocomplete="country"
-                />
-                <input
-                    name="postcode" placeholder="Postcode" type="text"
-                    autocomplete="postal-code"
-                />
-            </form>
-#}
+            <div id="map" style="width: 75%;"></div>
+            <script>
 
-            <a href="{{ path('group_index') }}">back to list</a>
-        </main>
-    </div>
-{% endblock %}
+                var url = "https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js";
+                $.getScript( url, function() {
+                    const map = new mapboxgl.Map({
+                        container: 'map',
+                        style: 'mapbox://styles/mapbox/streets-v11',
+                        center: [-79.4512, 43.6568],
+                        zoom: 13
+                    });
 
-{% block javascripts %}
-    {{ parent() }}
-    <script>
+                    var geocoder = new MapboxGeocoder({
+                        accessToken: mapboxgl.accessToken,
+                        mapboxgl: mapboxgl,
+                        types: 'country,region,place,postcode,locality,neighborhood,district,address,poi'
+                    });
+                    // Add the control to the map.
+                    map.addControl(
+                        geocoder
+                    );
+                    geocoder.on('result', (e) => {
+                        console.log(e.result);
+                        const featureCollection = e.result;
+                        //console.log(featureCollection.features[0].properties);
+                        const lng = featureCollection.geometry.coordinates[0];
+                        const lat = featureCollection.geometry.coordinates[1];
+                        // const streetNumber = featureCollection.features[0].properties.address_number;
+                        const id = featureCollection.id;
+                        // const street = featureCollection.features[0].properties.street;
+                        // const address_level2 = featureCollection.features[0].properties.address_level2;
+                        const address = featureCollection.place_name;
+                        const address_level1 = featureCollection.text;
+                        // const country = featureCollection.features[0].properties.country;
+                        // const postcode = featureCollection.features[0].properties.postcode;
+                        console.log(lng);
+                        console.log(lat);
+                        //console.log(streetNumber);
+                        console.log(id);
+                        //console.log(street);
 
-    </script>
-{% endblock %}
+                        $(document).find('#group_place_lat').val(lat);
+                        $(document).find('#group_place_lng').val(lng);
+                        // $(document).find('#group_place_country').val(country);
+                        // $(document).find('#group_place_zipCode').val(postcode);
+                        // $(document).find('#group_place_locality').val(address_level2);
+                        $(document).find('#group_place_areaRegion').val(address_level1);
+                        // $(document).find('#group_place_street').val(street);
+                        // $(document).find('#group_place_streetNumber').val(streetNumber);
+                        $(document).find('#group_place_placeId').val(id);
+                        $(document).find('#group_place_Adress').val(address);
+                    });
+                });
+                $(document).on('click', '.btn:not(.back)', function (e){
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    console.log('ici la mon gars');
+                    var form = $(document).find('form')[0];
+                    console.log(form)
+                    var url = "{{ path('group_new') }}";
+                    var data = new FormData(form);
+                    //var data = new form.serialize();
+
+                    console.log(url);
+                    console.log(data);
+
+                    $.ajax({
+                        type: "POST",
+                        processData: false,                          // Using FormData, no need to process data.
+                        contentType:false,
+                        url: url,
+                        data: data,
+                        success: function (data) {
+                            console.log(data);
+                            window.location.replace(data.url);
+                        }
+                    });
+
+                });
+            </script>
 

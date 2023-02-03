@@ -3,9 +3,21 @@
 {% block title %}New BlogPost{% endblock %}
 
 {% block body %}
-    <h1>Create new BlogPost</h1>
+    <div class="container">
+        <div class="add_new_group_header">
+            <h2 class="add_new_group_title">
+                Créer votre Post
+            </h2>
+            <div class="btn_container">
+                <a class="btn back" href="{{ path('group_show', {'id': group.id}) }}" style="background-color: #c92240; color: white; padding: 7px 10px; ">back to list</a>
+{#                <a href="#" class="btn" style="background-color: #66B1F1; color: white; padding: 7px 10px; "#}
+{#                >{{ button_label|default('Save') }}</a>#}
+            </div>
 
-    {{ include('blog_post/_form.html.twig') }}
+        </div>
 
-    <a href="{{ path('blog_post_index') }}">back to list</a>
+        {{ include('blog_post/_form.html.twig') }}
+
+    </div>
+
 {% endblock %}

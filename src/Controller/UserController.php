@@ -23,6 +23,9 @@ class UserController extends AbstractController
     #[Route('/', name: 'user_index', methods: ['GET'])]
     public function index(UserRepository $userRepository): Response
     {
+        $hasAccess = $this->isGranted('ROLE_SUPER_ADMIN');
+        $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
+
         return $this->render('user/index.html.twig', [
             'users' => $userRepository->findAll(),
         ]);
@@ -59,6 +62,10 @@ class UserController extends AbstractController
     #[Route('/{id}/edit', name: 'user_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, User $user, EntityManagerInterface $entityManager): Response
     {
+
+        if ($this->getUser()->getId() !== $user->getId()){
+            return $this->redirectToRoute('group_index');
+        }
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
@@ -139,7 +146,7 @@ class UserController extends AbstractController
 //                );
                 // do anything else you need here, like send an email
 
-                return $this->redirectToRoute('user');
+                return $this->redirectToRoute('userLogin');
             }
             //dump($form->get('plainPassword')->getData());
 

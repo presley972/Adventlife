@@ -57,9 +57,13 @@ class Place
     #[ORM\OneToMany(mappedBy: 'place', targetEntity: Group::class)]
     private $homeGroup;
 
+    #[ORM\OneToMany(mappedBy: 'place', targetEntity: Evenement::class)]
+    private $evenements;
+
     public function __construct()
     {
         $this->homeGroup = new ArrayCollection();
+        $this->evenements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -248,6 +252,36 @@ class Place
             // set the owning side to null (unless already changed)
             if ($homeGroup->getPlace() === $this) {
                 $homeGroup->setPlace(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Evenement[]
+     */
+    public function getEvenements(): Collection
+    {
+        return $this->evenements;
+    }
+
+    public function addEvenement(Evenement $evenement): self
+    {
+        if (!$this->evenements->contains($evenement)) {
+            $this->evenements[] = $evenement;
+            $evenement->setPlace($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEvenement(Evenement $evenement): self
+    {
+        if ($this->evenements->removeElement($evenement)) {
+            // set the owning side to null (unless already changed)
+            if ($evenement->getPlace() === $this) {
+                $evenement->setPlace(null);
             }
         }
 

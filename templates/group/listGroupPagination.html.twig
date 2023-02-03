@@ -1,0 +1,40 @@
+{% for group in groups %}
+    <div class="Card">
+        <div class="Card-image" {% if group.image %} style="background-image: url({{ asset('uploads/' ~ group.image.image) }});"{% endif %}></div>
+        <div class="Card-body">
+            <h1 class="Card-title">{{ group.title }}</h1>
+            <p class="Card-description">
+{#                {{ group.description | raw }}#}
+                {{ group.description|striptags|slice(0, 40) }}
+
+            </p>
+            <div class="card-btn-container">
+                <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class="btn btn-light btn-success"> Abonnez-vous</a>
+                <a href=" {{ path('group_show', {'id': group.id}) }}" class="btn btn-secondary btn-subscription"> Accedez</a>
+            </div>
+        </div>
+    </div>
+    {#<div class="col">
+            <div class="card h-100">
+                {% if group.image %}
+                    <img src="{{ asset('uploads/' ~ group.image.image) }}" class="card-img-top" alt="...">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ group.title }}</h5>
+                    <p class="card-text">{{ group.description | raw }}</p>
+                    <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class="btn btn-primary btn-subscription"> Abonnez-vous</a>
+                    <a href=" {{ path('group_show', {'id': group.id}) }}" class="btn btn-primary btn-subscription"> Accedez</a>
+                </div>
+            </div>
+        </div>#}
+
+        {% if group.place %}
+            <script>
+                new mapboxgl.Marker().setLngLat(['{{ group.place.lng }}', '{{ group.place.lat }}']).setPopup(new mapboxgl.Popup().setHTML("<h1>{{ group.place.adress }}</h1>")).addTo(map);
+
+            </script>
+
+        {% endif %}
+
+{% endfor %}
+

@@ -3,15 +3,19 @@
 namespace App\Controller;
 
 use App\Entity\BlogPost;
+use App\Entity\Evenement;
 use App\Entity\Group;
 use App\Entity\Image;
 use App\Entity\Place;
 use App\Entity\Subscription;
 use App\Form\BlogPostType;
+use App\Form\EvenementType;
 use App\Form\GroupType;
 use App\Repository\GroupRepository;
 use App\Service\FileUploader;
+use App\Service\GroupService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -26,8 +30,30 @@ class GroupController extends AbstractController
     #[Route('/', name: 'group_index', methods: ['GET'])]
     public function index(GroupRepository $groupRepository): Response
     {
-        return $this->render('group/index.html.twig', [
-            'groups' => $groupRepository->findAll(),
+
+        return $this->render('group/index.html.twig');
+    }
+
+    #[Route('/lists', name: 'group_list', methods: ['POST'])]
+    public function listGroup(GroupService $groupService)
+    {
+
+        return new JsonResponse([
+            'code' => 'success',
+            'html' => $this->renderView('group/listGroup.html.twig', [
+                'groups' =>   $groupService->getPaginatedGroups(),
+            ])
+        ]);
+    }
+    #[Route('/lists/pagination', name: 'group_list_page', methods: ['POST'])]
+    public function listGroupsPagination(Request $request,GroupService $groupService)
+    {
+        return new JsonResponse([
+            'code' => 'success',
+            'page' => $request->query->getInt('page') + 1,
+            'html' => $this->renderView('group/listGroupPagination.html.twig', [
+                'groups' =>   $groupService->getPaginatedGroups(),
+            ])
         ]);
     }
 
@@ -40,13 +66,20 @@ class GroupController extends AbstractController
         $group = new Group();
         $group->setOwner($user);
 
-        $form = $this->createForm(GroupType::class, $group);
+        $form = $this->createForm(GroupType::class, $group,[
+        'action' => $this->generateUrl('group_new'),
+            'method' => 'POST',
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // On récupère les images transmises
             /** @var UploadedFile $image */
             $image = $form->get('image')->getData();
+            /*dump($image);
+            dump($form->get('place')->getData());die();*/
+
+
             $group->setCreatedAt(new \DateTimeImmutable());
             if ($form->get('place') !== null && $form->get('place')->getData()->getAdress() !== null){
                 $dataPlace = $form->get('place')->getData();
@@ -78,21 +111,37 @@ class GroupController extends AbstractController
 
             $entityManager->persist($group);
             $entityManager->flush();
-            return $this->redirectToRoute('group_index', [], Response::HTTP_SEE_OTHER);
+            return new JsonResponse([
+                'code' => 'success',
+                'url' => $this->generateUrl('group_show', [ 'id' => $group->getId()])
+            ]);
 
         }
 
-        return $this->renderForm('group/new.html.twig', [
+        return new JsonResponse([
+            'code' => 'success',
+            'html' => $this->renderView('group/new.html.twig', [
+                'group' => $group,
+                'form' => $form->createView(),
+            ])
+        ]);
+        /*return $this->renderForm('group/new.html.twig', [
             'group' => $group,
             'form' => $form,
-        ]);
+        ]);*/
     }
 
     #[Route('/{id}', name: 'group_show', methods: ['GET'])]
-    public function show(Group $group): Response
+    public function show(Group $group, ManagerRegistry $doctrine): Response
     {
+        $events = $doctrine->getRepository(Evenement::class)->findByGroupResultArray($group->getId());
+        foreach ($events as $key => $event){
+            $events[$key]['start'] = $events[$key]['start']->Format('Y-m-d');
+            $events[$key]['end'] = $events[$key]['end']->Format('Y-m-d');
+        }
         return $this->render('group/show.html.twig', [
             'group' => $group,
+            'events' => $events
         ]);
     }
 
@@ -257,6 +306,57 @@ class GroupController extends AbstractController
 
         return $this->renderForm('blog_post/new.html.twig', [
             'blog_post' => $blogPost,
+            'group' => $group,
+            'form' => $form,
+        ]);
+    }
+
+
+    #[Route('/{id}/evenement/new', name: 'group_evenement_new', methods: ['GET', 'POST'])]
+    public function addGroupEvenement(Request $request, Group $group, EntityManagerInterface $entityManager, FileUploader $fileUploader){
+        $user = $this->getUser();
+        $evenement = new Evenement();
+        $form = $this->createForm(EvenementType::class, $evenement);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $group->addEvenement($evenement);
+            $evenement->setGroupe($group);
+            //$user->addEvenement($evenement);
+
+            $evenement->setCreatedAt(new \DateTimeImmutable());
+            if ($form->get('place') !== null && $form->get('place')->getData()->getAdress() !== null){
+                $dataPlace = $form->get('place')->getData();
+                $place = new Place();
+                $place->setCreatedAt(new \DateTimeImmutable('now'));
+                $place->setAdress($dataPlace->getAdress());
+                $place->setCountry($dataPlace->getCountry());
+                $place->setZipCode($dataPlace->getZipCode());
+                $place->setLocality($dataPlace->getLocality());
+                $place->setLat($dataPlace->getLat());
+                $place->setLng($dataPlace->getLng());
+                $place->setStreet($dataPlace->getStreet());
+                $place->setStreetNumber($dataPlace->getStreetNumber());
+                $place->setPlaceId($dataPlace->getPlaceId());
+                $place->setAreaRegion($dataPlace->getAreaRegion());
+                $place->addEvenement($evenement);
+                $evenement->setPlace($place);
+                $entityManager->persist($place);
+
+            }
+            $evenement->setCreatedBy($user);
+
+            $entityManager->persist($group);
+            $entityManager->persist($user);
+            $entityManager->persist($evenement);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('group_show', ['id' => $group->getId()], Response::HTTP_SEE_OTHER);
+        }
+
+        return $this->renderForm('evenement/new.html.twig', [
+            'evenement' => $evenement,
+            'group' => $group,
             'form' => $form,
         ]);
     }

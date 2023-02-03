@@ -14,7 +14,8 @@ global.$ = global.jQuery = $;
 // this "modifies" the jquery module: adding behavior to it
 // the bootstrap module doesn't export/return anything
 require('bootstrap');
-
+const calendar = require('fullcalendar');
+global.calendar = calendar;
 import { Tooltip, Toast, Popover} from "bootstrap";
 
 // start the Stimulus application

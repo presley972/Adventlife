@@ -39,6 +39,9 @@ class BlogPost
     #[ORM\OneToMany(mappedBy: 'blogPost', targetEntity: Comment::class, orphanRemoval: true)]
     private $comments;
 
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private $security;
+
     public function __construct()
     {
         $this->images = new ArrayCollection();
@@ -178,6 +181,18 @@ class BlogPost
                 $comment->setBlogPost(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSecurity(): ?bool
+    {
+        return $this->security ? $this->security : false;
+    }
+
+    public function setSecurity(bool $security): self
+    {
+        $this->security = $security;
 
         return $this;
     }

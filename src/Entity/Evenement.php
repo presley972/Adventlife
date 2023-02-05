@@ -108,7 +108,7 @@ class Evenement
 
     public function getSecurity(): ?bool
     {
-        return $this->security;
+        return $this->security ? $this->security : false;
     }
 
     public function setSecurity(bool $security): self

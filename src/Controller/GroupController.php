@@ -8,6 +8,7 @@ use App\Entity\Group;
 use App\Entity\Image;
 use App\Entity\Place;
 use App\Entity\Subscription;
+use App\Entity\User;
 use App\Form\BlogPostType;
 use App\Form\EvenementType;
 use App\Form\GroupType;
@@ -134,7 +135,12 @@ class GroupController extends AbstractController
     #[Route('/{id}', name: 'group_show', methods: ['GET'])]
     public function show(Group $group, ManagerRegistry $doctrine): Response
     {
-        $events = $doctrine->getRepository(Evenement::class)->findByGroupResultArray($group->getId());
+
+        $user = $this->getUser();
+        $member = $group->checkIfUserIsMember($user);
+
+        $events = $doctrine->getRepository(Evenement::class)->findByGroupAndMemberResultArray($group->getId(), $member);
+        //
         foreach ($events as $key => $event){
             $events[$key]['start'] = $events[$key]['start']->Format('Y-m-d');
             $events[$key]['end'] = $events[$key]['end']->Format('Y-m-d');
@@ -223,8 +229,18 @@ class GroupController extends AbstractController
 
         $groups = $entityManager->getRepository(Group::class)->findBy(['owner'=>$user]);
 
+        $notifications = [];
+        foreach ($groups as $group){
+            $notifications[$group->getId()] = $entityManager->getRepository(Subscription::class)->findByGroupAndUserCountSubscriber($user->getId(), $group->getId());
+
+        }
+
+
+
         return $this->render('group/myGroups.html.twig', [
-            'groups' => $groups
+            'groups' => $groups,
+            'user' => $user,
+            'notifications' => $notifications
         ]);
     }
 
@@ -237,10 +253,27 @@ class GroupController extends AbstractController
 
         /** @var Subscription $subscriptions */
         $subscriptions = $entityManager->getRepository(Subscription::class)->findByGroupAndUser($user->getId(), $group->getId());
+        foreach ($subscriptions as $subscription){
+            /** @var $subscription Subscription */
+            if ($subscription->getGroupStatut() === Subscription::SEND){
+                $subscription->setGroupStatut(Subscription::WAIT);
+                $subscription->setSubscriberStatut(Subscription::WAIT);
+                $subscription->setNotificationChecked(true);
+                $entityManager->persist($subscription);
+
+            }
+        }
+        $entityManager->flush();
+
+        $members = $entityManager->getRepository(User::class)->findMemberForGroup($group->getId());
+        $blockedMembers = $entityManager->getRepository(User::class)->findBlockedMemberForGroup($group->getId());
 
         return $this->render('group/myGroups_request_member.html.twig', [
             'subscriptions' => $subscriptions,
-            'group' => $group
+            'group' => $group,
+            'user' => $user,
+            'members' => $members,
+            'blockedMembers' => $blockedMembers,
         ]);
     }
 
@@ -265,9 +298,59 @@ class GroupController extends AbstractController
         $entityManager->flush();
 
 
-        return new JsonResponse([
-            'statut' => 'success'
-        ]);
+        return $this->redirectToRoute('my_groups_request', ['group' => $group->getId()], Response::HTTP_SEE_OTHER);
+
+
+
+    }
+
+    #[Route('/my/groups/{group}/subscription/{subscription}/request/refuser', name: 'my_groups_request_refus')]
+    public function refusMemberRequest(Request $request, EntityManagerInterface $entityManager, Group $group,Subscription $subscription){
+
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $user = $this->getUser();
+        if ($group->getOwner()->getId() !== $user->getId()){
+            $this->redirectToRoute('user_show',['id' => $user->getId()]);
+        }
+
+
+        $subscription->setGroupStatut(Subscription::DENIED);
+        $subscription->setGroupAcceptedAt(new \DateTimeImmutable());
+        $subscription->setModifiedAt(new \DateTimeImmutable());
+
+        $entityManager->persist($subscription);
+
+        $entityManager->flush();
+
+
+        return $this->redirectToRoute('my_groups_request', ['group' => $group->getId()], Response::HTTP_SEE_OTHER);
+
+
+
+    }
+    #[Route('/my/groups/{group}/subscription/{subscription}/request/delete', name: 'my_groups_request_delete')]
+    public function deleteMemberRequest(Request $request, EntityManagerInterface $entityManager, Group $group,Subscription $subscription){
+
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        $user = $this->getUser();
+        if ($group->getOwner()->getId() !== $user->getId()){
+            $this->redirectToRoute('user_show',['id' => $user->getId()]);
+        }
+
+        $subscription->setGroupStatut(Subscription::BLOCKED);
+        $subscription->setModifiedAt(new \DateTimeImmutable());
+        $subscription->getSubscriber()->removeGroup($group);
+
+
+        $entityManager->persist($subscription);
+        $entityManager->persist($subscription->getSubscriber());
+        $entityManager->persist($group);
+
+        $entityManager->flush();
+
+
+        return $this->redirectToRoute('my_groups_request', ['group' => $group->getId()], Response::HTTP_SEE_OTHER);
+
 
 
     }

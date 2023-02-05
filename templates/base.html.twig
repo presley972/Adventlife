@@ -96,7 +96,6 @@
                             }
                             $('.et-hero-tab-slider').css('width', width);
                             $('.et-hero-tab-slider').css('left', left);
-                            console.log(data);
                         }
                     });
                 })
@@ -127,6 +126,11 @@
                         <a class="nav-link" aria-current="page" href="#">Home</a>
                     </li>
                     {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                        {% if is_granted('ROLE_SUPER_ADMIN') %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{path('admin')}}">Tableau de board</a>
+                            </li>
+                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{path('group_index')}}">Groupe de maison</a>
                         </li>
@@ -134,7 +138,7 @@
                             <a class="nav-link" href="{{ path('user_show',{'id': app.user.id}) }}">Profile</a>
                         </li>
                         <li class="nav-item active">
-                            <a class="link" href="{{ path('app_logout') }}">Deconnexion</a>
+                            <a class="nav-link" href="{{ path('app_logout') }}">Deconnexion</a>
                         </li>
                     {% else %}
                         <li class="nav-item">

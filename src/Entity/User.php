@@ -55,6 +55,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Evenement::class, mappedBy: 'subscriber')]
     private $subscriber_evenements;
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $firstname;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $lastname;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $phoneNumber;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $church;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private $description;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private $privacyPolicy;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private $showEmail;
+
+    #[ORM\Column(type: 'boolean', nullable: true)]
+    private $showPhoneNumber;
+
     public function __construct()
     {
         $this->ownerGroups = new ArrayCollection();
@@ -352,6 +376,102 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if ($this->subscriber_evenements->removeElement($subscriberEvenement)) {
             $subscriberEvenement->removeSubscriber($this);
         }
+
+        return $this;
+    }
+
+    public function getFirstname(): ?string
+    {
+        return $this->firstname;
+    }
+
+    public function setFirstname(?string $firstname): self
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(?string $lastname): self
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    public function getPhoneNumber(): ?string
+    {
+        return $this->phoneNumber;
+    }
+
+    public function setPhoneNumber(?string $phoneNumber): self
+    {
+        $this->phoneNumber = $phoneNumber;
+
+        return $this;
+    }
+
+    public function getChurch(): ?string
+    {
+        return $this->church;
+    }
+
+    public function setChurch(?string $church): self
+    {
+        $this->church = $church;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getPrivacyPolicy(): ?bool
+    {
+        return $this->privacyPolicy;
+    }
+
+    public function setPrivacyPolicy(?bool $privacyPolicy): self
+    {
+        $this->privacyPolicy = $privacyPolicy;
+
+        return $this;
+    }
+
+    public function getShowEmail(): ?bool
+    {
+        return $this->showEmail;
+    }
+
+    public function setShowEmail(?bool $showEmail): self
+    {
+        $this->showEmail = $showEmail;
+
+        return $this;
+    }
+
+    public function getShowPhoneNumber(): ?bool
+    {
+        return $this->showPhoneNumber;
+    }
+
+    public function setShowPhoneNumber(?bool $showPhoneNumber): self
+    {
+        $this->showPhoneNumber = $showPhoneNumber;
 
         return $this;
     }

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\BlogPost;
 use App\Entity\Comment;
 use App\Form\CommentType;
 use App\Repository\CommentRepository;
@@ -77,5 +78,25 @@ class CommentController extends AbstractController
         }
 
         return $this->redirectToRoute('comment_index', [], Response::HTTP_SEE_OTHER);
+    }
+
+    #[Route('/{post}/ajax/comment', name: 'comment_add_ajax', methods: ['GET', 'POST'])]
+    public function addAjax(Request $request, EntityManagerInterface $entityManager, BlogPost $post)
+    {
+
+        $comment = new Comment();
+        $form = $this->createForm(CommentType::class, $comment);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()){
+            $comment->setCreatedAt(new \DateTimeImmutable('now'));
+            $comment->setOwner($this->getUser());
+            $comment->setBlogPost($post);
+        }
+        dump($comment);die();
+        $entityManager->persist($comment);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('group_show', ['id'=>$post->getGroupe()->getId()]);
     }
 }

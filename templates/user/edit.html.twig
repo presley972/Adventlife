@@ -3,11 +3,52 @@
 {% block title %}Edit User{% endblock %}
 
 {% block body %}
-    <h1>Edit User</h1>
+    <section style="background-color: #eee;">
+        <div class="container py-5">
+            <div class="row">
+                <div class="col">
+                    <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('home') }}">Accueil</a></li>
+                            {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
+                                <li class="breadcrumb-item"><a href="{{ path('user_index') }}">Liste des utilisateurs</a></li>
+                            {% endif %}
+                            <li class="breadcrumb-item"><a href="{{ path('user_show', {'id': user.id}) }}">Profil</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Edition</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
 
-    {{ include('user/_form.html.twig', {'button_label': 'Update'}) }}
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <div class="card-body text-center">
+                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
+                                 class="rounded-circle img-fluid" style="width: 150px;">
+                            <h5 class="my-3">{{ user.lastname ~ ' ' ~ user.firstname }}</h5>
+                            <p class="text-muted mb-1">Full Stack Developer</p>
+                            <p class="text-muted mb-4">Bay Area, San Francisco, CA</p>
+                            <div class="d-flex justify-content-center mb-2">
+                                <a href="{{ path('my_groups') }}" class="btn btn-primary">my groups</a>
+                                <button type="button" class="btn btn-outline-primary ms-1">Message</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-body text-center">
 
-    <a href="{{ path('user_index') }}">back to list</a>
-
+                            <h5 class="my-3">Verset du jour</h5>
+                            <div id="dailyVersesWrapper"></div>
+                            <script async defer src="https://dailyverses.net/get/verse.js?language=sg21"></script>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    {{ include('user/_form.html.twig', {'button_label': 'Update'}) }}
+                </div>
+            </div>
+        </div>
+    </section>
     {{ include('user/_delete_form.html.twig') }}
 {% endblock %}

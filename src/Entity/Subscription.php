@@ -11,6 +11,8 @@ class Subscription
     const SEND = 'SEND_INVITATION';
     const WAIT = 'WAITING_ACCEPTANCE';
     const ACCEPTED = 'ACCEPTED';
+    const DENIED = 'DENIED';
+    const BLOCKED = 'BLOCKED';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]

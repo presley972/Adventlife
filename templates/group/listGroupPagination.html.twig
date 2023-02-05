@@ -1,19 +1,26 @@
 {% for group in groups %}
-    <div class="Card">
-        <div class="Card-image" {% if group.image %} style="background-image: url({{ asset('uploads/' ~ group.image.image) }});"{% endif %}></div>
-        <div class="Card-body">
-            <h1 class="Card-title">{{ group.title }}</h1>
-            <p class="Card-description">
-{#                {{ group.description | raw }}#}
-                {{ group.description|striptags|slice(0, 40) }}
+    {% if not group.checkIfUserIsBlocked(app.user.id) %}
+        <div class="Card">
+            <div class="Card-image" {% if group.image %} style="background-image: url({{ asset('uploads/' ~ group.image.image) }});"{% endif %}></div>
+            <div class="Card-body">
+                <h1 class="Card-title">{{ group.title }}</h1>
+                <p class="Card-description">
+                    {#                {{ group.description | raw }}#}
+                    {{ group.description|striptags|slice(0, 40) }}
 
-            </p>
-            <div class="card-btn-container">
-                <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class="btn btn-light btn-success"> Abonnez-vous</a>
-                <a href=" {{ path('group_show', {'id': group.id}) }}" class="btn btn-secondary btn-subscription"> Accedez</a>
+                </p>
+                <div class="card-btn-container">
+
+                    {% if not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
+                        <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class="btn btn-light btn-success"> Abonnez-vous</a>
+                    {% endif %}
+                    <a href=" {{ path('group_show', {'id': group.id}) }}" class="btn btn-secondary btn-subscription"> Accedez</a>
+                </div>
             </div>
         </div>
-    </div>
+
+    {% endif %}
+
     {#<div class="col">
             <div class="card h-100">
                 {% if group.image %}

@@ -226,6 +226,9 @@ input[type="checkbox"] {
         right: 0;
     }
 }
+input[type="checkbox"].show{
+    display: block !important;
+}
 
 /*.hiddenField{
     display: none !important;
@@ -271,7 +274,7 @@ a {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 50vh;
+    height: 35vh;
     position: relative;
     background: #eee;
     text-align: center;
@@ -373,10 +376,10 @@ a {
         display: flex;
         justify-content: center;
 
-        margin: auto;
+
         margin-bottom: 2em;
-        width: 34rem;
-        min-height: 26rem;
+        width: 25rem;
+        min-height: 16rem;
         .Card-image {
             flex-basis: 40%;
             background-position: center;

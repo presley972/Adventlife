@@ -55,9 +55,24 @@ class SubscriptionRepository extends ServiceEntityRepository
         $qb
             ->innerJoin('s.groupe', 'groupe', Join::WITH, 'groupe.id = :idGroup')
             ->innerJoin('groupe.owner', 'owner', Join::WITH, 'owner.id = :user')
-            ->setParameters(['idGroup' => $group, 'user' => $user])
+            ->where('s.group_statut = :statut1 or s.group_statut = :statut2')
+            ->setParameters(['idGroup' => $group, 'user' => $user, 'statut1' => 'SEND_INVITATION', 'statut2'=> 'WAITING_ACCEPTANCE'])
         ;
 
         return $qb->getQuery()->getResult();
+    }
+    public function findByGroupAndUserCountSubscriber($user, $group){
+        $qb = $this->createQueryBuilder('s');
+
+        $qb
+            ->select($qb->expr()->countDistinct('s.id'))
+            ->innerJoin('s.groupe', 'groupe', Join::WITH, 'groupe.id = :idGroup')
+            ->innerJoin('groupe.owner', 'owner', Join::WITH, 'owner.id = :user')
+            ->where('s.group_statut = :statut1')
+            ->andWhere('s.notification_checked = false')
+            ->setParameters(['idGroup' => $group, 'user' => $user, 'statut1' => 'SEND_INVITATION'])
+        ;
+
+        return $qb->getQuery()->getSingleResult();
     }
 }

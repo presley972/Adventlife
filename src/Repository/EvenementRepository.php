@@ -23,15 +23,18 @@ class EvenementRepository extends ServiceEntityRepository
     // /**
     //  * @return Evenement[] Returns an array of Evenement objects
     //  */
-    public function findByGroupResultArray($group)
+    public function findByGroupAndMemberResultArray($group, $member)
     {
-        return $this->createQueryBuilder('e')
+        $qb = $this->createQueryBuilder('e')
             ->select('e.title', 'e.start', 'e.end_at as end')
             ->innerJoin('e.groupe', 'groupe', Join::WITH, 'groupe.id = :group')
-            ->setParameter(':group', $group)
-            ->getQuery()
-            ->getResult()
-        ;
+            ->setParameter(':group', $group);
+
+        if (!$member){
+            $qb->where('e.security = false');
+        }
+
+        return  $qb->getQuery()->getResult();
     }
 
     /*

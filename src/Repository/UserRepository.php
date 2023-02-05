@@ -2,8 +2,10 @@
 
 namespace App\Repository;
 
+use App\Entity\Subscription;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -34,6 +36,37 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newHashedPassword);
         $this->_em->persist($user);
         $this->_em->flush();
+    }
+
+    public function findMemberForGroup($group)
+    {
+        $qb = $this->createQueryBuilder('user');
+
+        $qb->select('user.id','user.firstname', 'user.lastname', 'user.email')
+            ->innerJoin('user.subscriptions', 'subscriptions')
+            ->innerJoin('subscriptions.groupe', 'groupe', Join::WITH, 'groupe.id = :idGroup')
+            ->addSelect('subscriptions.id as idSubscrib', 'subscriptions.group_acceptedAt as dateAccept', 'groupe.id as GroupId')
+            ->where('subscriptions.group_statut = :statut')
+            ->setParameters(['idGroup' => $group, 'statut' => Subscription::ACCEPTED])
+        ;
+
+        return $qb->getQuery()->getArrayResult();
+
+    }
+    public function findBlockedMemberForGroup($group)
+    {
+        $qb = $this->createQueryBuilder('user');
+
+        $qb->select('user.id','user.firstname', 'user.lastname', 'user.email')
+            ->innerJoin('user.subscriptions', 'subscriptions')
+            ->innerJoin('subscriptions.groupe', 'groupe', Join::WITH, 'groupe.id = :idGroup')
+            ->addSelect('subscriptions.id as idSubscrib', 'subscriptions.group_acceptedAt as dateAccept', 'groupe.id as GroupId')
+            ->where('subscriptions.group_statut = :statut')
+            ->setParameters(['idGroup' => $group, 'statut' => Subscription::BLOCKED])
+        ;
+
+        return $qb->getQuery()->getArrayResult();
+
     }
 
     // /**

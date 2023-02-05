@@ -260,4 +260,36 @@ class Group
 
         return $this;
     }
+
+    public function checkIfUserIsSubcriber(User $user)
+    {
+        foreach ($this->getSubscriptions() as $subscription){
+            if ($subscription->getSubscriber() === $user){
+                return true;
+            }
+        }
+        return false;
+    }
+    public function checkIfUserIsMember(User $user)
+    {
+        if ($this->getOwner()->getId() === $user->getId()){
+            return true;
+        }
+        foreach ($this->getSubscriptions() as $subscription){
+            if ($subscription->getSubscriber() === $user && $subscription->getGroupStatut() === Subscription::ACCEPTED){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function checkIfUserIsBlocked($user)
+    {
+        foreach ($this->getSubscriptions() as $subscription){
+            if ($subscription->getGroupStatut() === Subscription::BLOCKED && $subscription->getSubscriber()->getId() === $user){
+                return true;
+            }
+        }
+        return false;
+    }
 }

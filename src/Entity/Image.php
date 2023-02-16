@@ -19,6 +19,8 @@ class Image
 
     #[ORM\OneToOne(inversedBy: 'image', targetEntity: Group::class, cascade: ['persist', 'remove'])]
     private $groupe;
+    #[ORM\OneToOne(inversedBy: 'profilPicture', targetEntity: User::class, cascade: ['persist', 'remove'])]
+    private $userProfilPicture;
 
     #[ORM\Column(type: 'datetime_immutable')]
     private $createdAt;
@@ -95,6 +97,18 @@ class Image
     public function setBlogPost(?BlogPost $blogPost): self
     {
         $this->blogPost = $blogPost;
+
+        return $this;
+    }
+
+    public function getUserProfilPicture(): ?User
+    {
+        return $this->userProfilPicture;
+    }
+
+    public function setUserProfilPicture(?User $user): self
+    {
+        $this->userProfilPicture = $user;
 
         return $this;
     }

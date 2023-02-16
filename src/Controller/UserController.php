@@ -2,15 +2,18 @@
 
 namespace App\Controller;
 
+use App\Entity\Image;
 use App\Entity\User;
 use App\Form\RegistrationFormType;
 use App\Form\User1Type;
 use App\Form\UserEditType;
 use App\Form\UserType;
 use App\Repository\UserRepository;
+use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -61,7 +64,7 @@ class UserController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'user_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, User $user, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, User $user, EntityManagerInterface $entityManager, FileUploader $fileUploader): Response
     {
 
         if ($this->getUser()->getId() !== $user->getId()){
@@ -71,6 +74,16 @@ class UserController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            /** @var UploadedFile $image */
+            $image = $form->get('profilPicture')->getData();
+            if ($image !== null ){
+                $fichier = $fileUploader->upload($image);
+                // On crée l'image dans la base de données
+                $img = new Image();
+                $img->setImage($fichier);
+                $user->setProfilPicture($img);
+
+            }
             $entityManager->flush();
 
             return $this->redirectToRoute('user_show', ['id'=> $user->getId()], Response::HTTP_SEE_OTHER);
@@ -147,7 +160,7 @@ class UserController extends AbstractController
 //                );
                 // do anything else you need here, like send an email
 
-                return $this->redirectToRoute('userLogin');
+                return $this->redirectToRoute('login');
             }
             //dump($form->get('plainPassword')->getData());
 

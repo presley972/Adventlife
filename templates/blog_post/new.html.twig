@@ -1,6 +1,16 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}New BlogPost{% endblock %}
+{% block mainHeader %}
+    <div
+        class="text-center bg-image"
+        {% if group.image is defined and group.image is not null and group.image.image is not null %}
+            style="background-image: url('{{ asset('uploads/' ~ group.image.image) }}'); height: 200px"
+        {% endif %}
+    >
+    </div>
+
+{% endblock %}
 
 {% block body %}
     <div class="container">

@@ -5,26 +5,36 @@
 {% block title %}New Evenement{% endblock %}
 
 {% block body %}
-    <style>
-        #map { position: absolute;    width: 100%;
-            height: 50%;}
-    </style>
-    <div class="container">
-        <div class="add_new_group_header">
-            <h2 class="add_new_group_title">
-                Créer votre Evenement
-            </h2>
-            <div class="btn_container">
-                <a class="btn back" href="{{ path('group_show', {'id': group.id}) }}" style="background-color: #c92240; color: white; padding: 7px 10px; ">back to list</a>
-                                <a href="#" class="btn" style="background-color: #66B1F1; color: white; padding: 7px 10px; "
-                                >{{ button_label|default('Save') }}</a>
+    <section>
+        <div class="container py-5">
+
+            <div class="row">
+                <div class="col-lg-3" style="margin-top: 15%;">
+                    <div class=" mb-3">
+                        <div class="text-center">
+                            <div id="map" style="width: 100%; height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-9">
+                    <div class="add_new_group_header">
+                        <h2 class="add_new_group_title">
+                            Créer votre Evenement
+                        </h2>
+                        <div class="btn_container">
+                            <a class="btn back" href="{{ path('group_show', {'id': group.id}) }}" style="background-color: #c92240; color: white; padding: 7px 10px; ">back to list</a>
+                            <a href="#" class="btn" style="background-color: #66B1F1; color: white; padding: 7px 10px; "
+                            >{{ button_label|default('Save') }}</a>
+
+                        </div>
+                        {{ include('evenement/_form.html.twig') }}
+
+                    </div>
+
+                </div>
             </div>
-
         </div>
-
-        {{ include('evenement/_form.html.twig') }}
-        <div id="map" style="width: 75%;"></div>
-    </div>
+    </section>
 {% endblock %}
 {% block javascripts %}
     {{ encore_entry_script_tags('datepicker') }}
@@ -115,7 +125,7 @@
                 data: data,
                 success: function (data) {
                     console.log(data);
-                    // window.location.replace(data.url);
+                    window.location.replace(data.url);
                 }
             });
 

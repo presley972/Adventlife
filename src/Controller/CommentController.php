@@ -6,8 +6,10 @@ use App\Entity\BlogPost;
 use App\Entity\Comment;
 use App\Form\CommentType;
 use App\Repository\CommentRepository;
+use App\Service\CommentService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -88,15 +90,29 @@ class CommentController extends AbstractController
         $form = $this->createForm(CommentType::class, $comment);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()){
             $comment->setCreatedAt(new \DateTimeImmutable('now'));
             $comment->setOwner($this->getUser());
             $comment->setBlogPost($post);
-        }
-        dump($comment);die();
         $entityManager->persist($comment);
         $entityManager->flush();
 
-        return $this->redirectToRoute('group_show', ['id'=>$post->getGroupe()->getId()]);
+        return new JsonResponse([
+            "code" => 'success',
+            "html" => $this->renderView('comment/comment_template_view.html.twig',['comment' => $comment]),
+            "commentCount" => count($post->getComments())
+        ]);
+    }
+
+    #[Route('/lists/pagination/{blogPost}', name: 'comment_list_page', methods: ['POST'])]
+    public function listGroupsPagination(Request $request,CommentService $commentService, BlogPost $blogPost)
+    {
+        return new JsonResponse([
+            'code' => 'success',
+            'page' => $request->query->getInt('page') + 1,
+            'blogPost' => $blogPost->getId(),
+            'html' => $this->renderView('comment/listCommentPagination.html.twig', [
+                'comments' =>   $commentService->getPaginatedComments($blogPost->getId()),
+            ])
+        ]);
     }
 }

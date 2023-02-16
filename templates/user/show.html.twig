@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}User{% endblock %}
-
+{% block navModul %}{% endblock %}
 {% block body %}
 
     <section style="background-color: #eee;">
@@ -29,8 +29,12 @@
                 <div class="col-lg-4">
                     <div class="card mb-4">
                         <div class="card-body text-center">
-                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
-                                 class="rounded-circle img-fluid" style="width: 150px;">
+                            {% if user.profilPicture is defined and user.profilPicture is not null and user.profilPicture.image is not null %}
+{#                                style="background-image: url('{{ asset('uploads/' ~ group.image.image) }}'); height: 200px"#}
+                                <img src="{{ asset('uploads/' ~ user.profilPicture.image) }}" alt="avatar"
+                                     class="rounded-circle img-fluid" style="width: 150px;">
+                            {% endif %}
+
                             <h5 class="my-3">{{ user.lastname ~ ' ' ~ user.firstname }}</h5>
                             <p class="text-muted mb-1">Full Stack Developer</p>
                             <p class="text-muted mb-4">Bay Area, San Francisco, CA</p>

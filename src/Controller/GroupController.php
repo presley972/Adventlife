@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\BlogPost;
 use App\Entity\Evenement;
 use App\Entity\Group;
+use App\Entity\GroupCategory;
 use App\Entity\Image;
 use App\Entity\Place;
 use App\Entity\Subscription;
@@ -13,6 +14,7 @@ use App\Form\BlogPostType;
 use App\Form\EvenementType;
 use App\Form\GroupType;
 use App\Repository\GroupRepository;
+use App\Service\CommentService;
 use App\Service\FileUploader;
 use App\Service\GroupService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,10 +31,12 @@ use Symfony\Component\Routing\Annotation\Route;
 class GroupController extends AbstractController
 {
     #[Route('/', name: 'group_index', methods: ['GET'])]
-    public function index(GroupRepository $groupRepository): Response
+    public function index(GroupService $groupService): Response
     {
 
-        return $this->render('group/index.html.twig');
+        return $this->render('group/index.html.twig',[
+            'groups' =>   $groupService->getPaginatedGroups(),
+        ]);
     }
 
     #[Route('/lists', name: 'group_list', methods: ['POST'])]
@@ -77,12 +81,8 @@ class GroupController extends AbstractController
             // On récupère les images transmises
             /** @var UploadedFile $image */
             $image = $form->get('image')->getData();
-            /*dump($image);
-            dump($form->get('place')->getData());die();*/
-
-
             $group->setCreatedAt(new \DateTimeImmutable());
-            if ($form->get('place') !== null && $form->get('place')->getData()->getAdress() !== null){
+            if ($form->get('place') !== null && $form->get('place')->getData() !== null && $form->get('place')->getData()->getAdress() !== null){
                 $dataPlace = $form->get('place')->getData();
                 $place = new Place();
                 $place->setCreatedAt(new \DateTimeImmutable('now'));
@@ -109,6 +109,14 @@ class GroupController extends AbstractController
                 $group->setImage($img);
 
             }
+            if ($form->get('groupCategories') !== null && $form->get('groupCategories')->getData() !== null){
+
+                /** @var GroupCategory $category */
+                foreach ($form->get('groupCategories')->getData() as $category){
+                    $group->addGroupCategory($category);
+
+                }
+            }
 
             $entityManager->persist($group);
             $entityManager->flush();
@@ -119,13 +127,10 @@ class GroupController extends AbstractController
 
         }
 
-        return new JsonResponse([
-            'code' => 'success',
-            'html' => $this->renderView('group/new.html.twig', [
+        return $this->render('group/new.html.twig', [
                 'group' => $group,
                 'form' => $form->createView(),
-            ])
-        ]);
+            ]);
         /*return $this->renderForm('group/new.html.twig', [
             'group' => $group,
             'form' => $form,
@@ -133,7 +138,7 @@ class GroupController extends AbstractController
     }
 
     #[Route('/{id}', name: 'group_show', methods: ['GET'])]
-    public function show(Group $group, ManagerRegistry $doctrine): Response
+    public function show(Group $group, ManagerRegistry $doctrine, CommentService $commentService): Response
     {
 
         $user = $this->getUser();
@@ -144,10 +149,18 @@ class GroupController extends AbstractController
         foreach ($events as $key => $event){
             $events[$key]['start'] = $events[$key]['start']->Format('Y-m-d');
             $events[$key]['end'] = $events[$key]['end']->Format('Y-m-d');
+            $events[$key]['url'] = $this->generateUrl('evenement_show',['evenement'=> $events[$key]['id'], 'group'=>$group->getId()]);
         }
+        $comments = [];
+        foreach ($group->getBlogPosts() as $post){
+            $comments[$post->getId()] = $commentService->getPaginatedComments($post->getId());
+
+        }
+
         return $this->render('group/show.html.twig', [
             'group' => $group,
-            'events' => $events
+            'events' => $events,
+            'comments' => $comments
         ]);
     }
 
@@ -157,10 +170,45 @@ class GroupController extends AbstractController
         $form = $this->createForm(GroupType::class, $group);
         $form->handleRequest($request);
 
+        //dump($form);die();
+
         if ($form->isSubmitted() && $form->isValid()) {
 
+            if ($form->get('place') !== null && $form->get('place')->getData() !== null && $form->get('place')->getData()->getAdress() !== null){
+
+                if ($group->getPlace()){
+                    $oldGroupPlace = $group->getPlace();
+                    $oldGroupPlace->removeHomeGroup($group);
+                    $entityManager->remove($oldGroupPlace);
+                    $entityManager->flush();
+                }
+                $dataPlace = $form->get('place')->getData();
+                $place = new Place();
+                $place->setCreatedAt(new \DateTimeImmutable('now'));
+                $place->setAdress($dataPlace->getAdress());
+                $place->setCountry($dataPlace->getCountry());
+                $place->setZipCode($dataPlace->getZipCode());
+                $place->setLocality($dataPlace->getLocality());
+                $place->setLat($dataPlace->getLat());
+                $place->setLng($dataPlace->getLng());
+                $place->setStreet($dataPlace->getStreet());
+                $place->setStreetNumber($dataPlace->getStreetNumber());
+                $place->setPlaceId($dataPlace->getPlaceId());
+                $place->setAreaRegion($dataPlace->getAreaRegion());
+                $place->addHomeGroup($group);
+                $group->setPlace($place);
+                $entityManager->persist($place);
+
+            }
             $image = $form->get('image')->getData();
-            if ($image){
+            if ($image !== null){
+                if ($group->getImage()){
+                    $oldGroupImage = $group->getImage();
+                    $oldGroupImage->setGroupe(null);
+                    $group->setImage(null);
+                    $entityManager->persist($oldGroupImage);
+                    $entityManager->flush();
+                }
                 $fichier = $fileUploader->upload($image);
 
                 // On crée l'image dans la base de données
@@ -168,10 +216,25 @@ class GroupController extends AbstractController
                 $img->setImage($fichier);
                 $group->setImage($img);
             }
+            if ($form->get('groupCategories') !== null && $form->get('groupCategories')->getData() !== null){
+
+                $categories = $form->get('groupCategories')->getData();
+                if ($group->getGroupCategories()){
+                    foreach ($group->getGroupCategories() as $oldCategory){
+                        if (!$categories->contains($oldCategory)){
+                            $group->removeGroupCategory($oldCategory);
+                        }
+                    }
+                }
+                /** @var GroupCategory $category */
+                foreach ($categories as $category){
+                    $group->addGroupCategory($category);
+                }
+            }
 
             $entityManager->flush();
 
-            return $this->redirectToRoute('group_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('group_show', ['id' => $group->getId()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->renderForm('group/edit.html.twig', [
@@ -183,7 +246,7 @@ class GroupController extends AbstractController
     #[Route('/{id}', name: 'group_delete', methods: ['POST'])]
     public function delete(Request $request, Group $group, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$group->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$group->getId(), $request->request->get('_token')) && ($group->getOwner()->getId() === $this->getUser()->getId() || $this->isGranted('ROLE_SUPER_ADMIN'))) {
             $entityManager->remove($group);
             $entityManager->flush();
         }
@@ -434,7 +497,10 @@ class GroupController extends AbstractController
             $entityManager->persist($evenement);
             $entityManager->flush();
 
-            return $this->redirectToRoute('group_show', ['id' => $group->getId()], Response::HTTP_SEE_OTHER);
+            return new JsonResponse([
+                'code' => "success",
+                'url' => $this->generateUrl('group_show', ['id' => $group->getId()])
+            ]);
         }
 
         return $this->renderForm('evenement/new.html.twig', [

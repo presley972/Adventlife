@@ -26,7 +26,7 @@ class EvenementRepository extends ServiceEntityRepository
     public function findByGroupAndMemberResultArray($group, $member)
     {
         $qb = $this->createQueryBuilder('e')
-            ->select('e.title', 'e.start', 'e.end_at as end')
+            ->select('e.id','e.title', 'e.start', 'e.end_at as end')
             ->innerJoin('e.groupe', 'groupe', Join::WITH, 'groupe.id = :group')
             ->setParameter(':group', $group);
 
@@ -35,6 +35,23 @@ class EvenementRepository extends ServiceEntityRepository
         }
 
         return  $qb->getQuery()->getResult();
+    }
+
+    public function findForPagination($group, $member)
+    {
+
+        $qb = $this->createQueryBuilder('e');
+
+        $qb
+            ->innerJoin('e.groupe', 'groupe', Join::WITH, 'groupe.id = :group')
+            ->setParameter(':group', $group);
+
+        if (!$member){
+            $qb->where('e.security = false');
+        }
+
+        return $qb->getQuery();
+
     }
 
     /*

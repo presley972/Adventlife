@@ -6,7 +6,15 @@
         <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
         <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet">
         <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <title>{% block title %}Welcome!{% endblock %}</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.default.min.css"
+            integrity="sha512-pTaEn+6gF1IeWv3W1+7X7eM60TFu/agjgoHmYhAfLEU8Phuf6JKiiE8YmsNC0aCgQv4192s4Vai8YZ6VNM6vyQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
         {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
         {% block stylesheets %}
@@ -38,6 +46,12 @@
                 src="https://api.mapbox.com/search-js/v1.0.0-beta.12/web.js"
             >
             </script>
+            <script
+                src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/js/selectize.min.js"
+                integrity="sha512-IOebNkvA/HZjMM7MxL0NYeLYEalloZ8ckak+NDtOViP7oiYzG5vn6WVXyrJDiJPhl4yRdmNAG49iuLmhkUdVsQ=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer"
+            ></script>
             <script>
                 const script = document.getElementById('search-js');
                 mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
@@ -122,9 +136,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarExample01">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item active">
-                        <a class="nav-link" aria-current="page" href="#">Home</a>
-                    </li>
+{#                    <li class="nav-item active">#}
+{#                        <a class="nav-link" aria-current="page" href="#">Home</a>#}
+{#                    </li>#}
                     {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
                         {% if is_granted('ROLE_SUPER_ADMIN') %}
                             <li class="nav-item">
@@ -132,21 +146,14 @@
                             </li>
                         {% endif %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{path('group_index')}}">Groupe de maison</a>
-                        </li>
-                        <li class="nav-item">
                             <a class="nav-link" href="{{ path('user_show',{'id': app.user.id}) }}">Profile</a>
                         </li>
                         <li class="nav-item active">
                             <a class="nav-link" href="{{ path('app_logout') }}">Deconnexion</a>
                         </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="#">About</a>
-                        </li>
                     <li class="nav-item">
-
-                    <a class="link" href="{{ path('userLogin') }}">Connexion</a>
+                        <a class="link" href="{{ path('userLogin') }}">Connexion</a>
                     </li>
 
                     {% endif %}
@@ -159,37 +166,84 @@
 
     <!-- Background image -->
     {% block mainHeader %}
-        <section class="et-hero-tabs" style="background-image: linear-gradient(180deg,rgba(58,110,173,0.73) 100%,rgba(25,91,206,0.71) 100%), url('https://www.actu-environnement.com/images/illustrations/news/32794_large.jpg');">
-            <div class="first-header">
-                <div class="first-element-first-header">
-                        <span>
-                            +33 7 68 08 46 44
-                        </span>
-                </div>
-                <div class="second-element-first-header">
-                        <span>
-                            +33 7 68 08 46 44
-                        </span>
-                </div>
-                <div class="third-element-first-header">
-                    <span>
-                            +33 7 68 08 46 44
-                    </span>
-                </div>
+        <div class="MAIN-header">
 
+            <div class="BG-header-box">
+                <img  class="BG-header" src={% block imgHeader %}"https://www.christianismeaujourdhui.info/wp-content/uploads/sites/3/2021/06/VI_priere-1220176255-1576x0-c-default.jpg"{% endblock %}>
             </div>
-            <h1>STICKY SLIDER NAV</h1>
-            <h3>Sliding content with sticky tab nav</h3>
-            {% block navigationHeader %}
 
+            <div class="MAIN-header-TOP">
+                <div class="MAIN-header-TOP-partSide">
+                    <div>+33 7 68 08 46 44</div>
+                </div>
+                <div class="MAIN-header-TOP-partCenter">
+                    <div>contact@adventlife.fr</div>
+                    <div class="picto-img">
+{#                        <img src="{{ asset('uploads/icons8-seventh-day-adventist-church-50.png') }}">#}
+                    </div>
+                </div>
+                <div class="MAIN-header-TOP-partSide">
+
+                </div>
+            </div>
+
+                <div class="MAIN-header-MIDDLE">
+                <div class="MAIN-header-MIDDLE-logo">
+                    <img src="https://adventlife.fr/adventradio/V5/images/logo-new-radio.png">
+                </div>
+
+                <div class="MAIN-header-MIDDLE-btnBox">
+
+                    <div class="absoluteLINE"></div>
+
+                    <div class="MIDDLE-btnBox-container">
+                        <div class="MIDDLE-btnBox-container-picto">
+                            <div class="picto-img">
+                                <img src="{{ asset('uploads/icons8-microphone-100.png') }}">
+                            </div>
+                            <div class="picto-title menuLink"><a class="nav-link" href="https://adventlife.fr/adventradio/V5/index.html">Radio / Média</a></div>
+                        </div>
+
+                        <div class="MIDDLE-btnBox-container-picto">
+                            <div class="picto-img">
+                                <img src="{{ asset('uploads/icons8-prier-100.png') }}">
+                            </div>
+                            <div class="picto-title menuLink"><a class="nav-link" href="#">Réseau de prière</a></div>
+                        </div>
+
+                        <div class="MIDDLE-btnBox-container-picto">
+                            <div class="picto-img">
+                                <img src="{{ asset('uploads/icons8-page-d’accueil-96.png') }}">
+                            </div>
+                            <div class="picto-title menuLink"><a class="nav-link" href="{{path('group_index')}}">Groupe de maison</a></div>
+                        </div>
+
+                        <div class="MIDDLE-btnBox-container-picto">
+                            <div class="picto-img">
+                                <img src="{{ asset('uploads/icons8-hand-holding-heart-100.png') }}">
+                            </div>
+                            <div class="picto-title menuLink"><a class="nav-link" href="#">réseau troc / partage</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% block navModul %}
+                <div class="MAIN-header-BOTTOM">
+                    <div class="menuLink"><a href="{{ path('group_index') }}"> liste des groupes</a></div>
+                    <div class="menuLink"><a href="{{ path('group_new') }}"> Créer un groupe</a></div>
+                    <div class="menuLink">trouver un groupe</div>
+
+                </div>
             {% endblock %}
 
-        </section>
+
+        </div>
+
     {% endblock %}
 
     <!-- Background image -->
     </header>
-    <body>
+    <body class="body" id="body">
     {% block body %}{% endblock %}
 
     </body>
@@ -209,4 +263,5 @@
         </ul>
     </footer>
     {% endblock %}
+
 </html>

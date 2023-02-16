@@ -78,6 +78,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'boolean', nullable: true)]
     private $showPhoneNumber;
+    #[ORM\OneToOne(mappedBy: 'userProfilPicture', targetEntity: Image::class, cascade: ['persist', 'remove'])]
+    private $profilPicture;
 
     public function __construct()
     {
@@ -472,6 +474,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setShowPhoneNumber(?bool $showPhoneNumber): self
     {
         $this->showPhoneNumber = $showPhoneNumber;
+
+        return $this;
+    }
+
+    public function getProfilPicture(): ?Image
+    {
+        return $this->profilPicture;
+    }
+
+    public function setProfilPicture(?Image $image): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($image === null && $this->profilPicture !== null) {
+            $this->profilPicture->setUserProfilPicture(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($image !== null && $image->getUserProfilPicture() !== $this) {
+            $image->setUserProfilPicture($this);
+        }
+
+        $this->profilPicture = $image;
 
         return $this;
     }

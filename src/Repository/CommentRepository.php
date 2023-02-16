@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Comment;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -47,4 +48,19 @@ class CommentRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function findForPagination($post)
+    {
+
+        $qb = $this->createQueryBuilder('c');
+
+        $qb
+            ->innerJoin('c.blogPost', 'blogPost', Join::WITH, 'blogPost = :idPost')
+            ->orderBy('c.createdAt', 'DESC')
+            ->setParameters(['idPost'=>$post])
+        ;
+
+        return $qb->getQuery();
+
+    }
 }

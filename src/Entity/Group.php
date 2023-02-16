@@ -11,6 +11,9 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: '`group`')]
 class Group
 {
+    const LOCATIONREUNION = ['Presentiel' => 'Presentiel', 'Distantiel' => 'Distantiel'];
+    const THEME = ['Prière'=> 'Prière', 'Louange'=> 'Louange', 'Partage'=>'Partage'];
+    const FREQUENCE = ['Hebdomadaire'=>'Hebdomadaire', 'Mensuel'=>'Mensuel', 'Journalier'=>'Journalier'];
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -47,12 +50,25 @@ class Group
     #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: Evenement::class)]
     private $evenements;
 
+    #[ORM\ManyToMany(targetEntity: GroupCategory::class, mappedBy: 'groupe')]
+    private $groupCategories;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $theme;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $frequence;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private $location;
+
     public function __construct()
     {
         $this->members = new ArrayCollection();
         $this->subscriptions = new ArrayCollection();
         $this->blogPosts = new ArrayCollection();
         $this->evenements = new ArrayCollection();
+        $this->groupCategories = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -292,4 +308,68 @@ class Group
         }
         return false;
     }
+
+    /**
+     * @return Collection|GroupCategory[]
+     */
+    public function getGroupCategories(): Collection
+    {
+        return $this->groupCategories;
+    }
+
+    public function addGroupCategory(GroupCategory $groupCategory): self
+    {
+        if (!$this->groupCategories->contains($groupCategory)) {
+            $this->groupCategories[] = $groupCategory;
+            $groupCategory->addGroupe($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroupCategory(GroupCategory $groupCategory): self
+    {
+        if ($this->groupCategories->removeElement($groupCategory)) {
+            $groupCategory->removeGroupe($this);
+        }
+
+        return $this;
+    }
+
+    public function getTheme(): ?string
+    {
+        return $this->theme;
+    }
+
+    public function setTheme(?string $theme): self
+    {
+        $this->theme = $theme;
+
+        return $this;
+    }
+
+    public function getFrequence(): ?string
+    {
+        return $this->frequence;
+    }
+
+    public function setFrequence(?string $frequence): self
+    {
+        $this->frequence = $frequence;
+
+        return $this;
+    }
+
+    public function getLocation(): ?string
+    {
+        return $this->location;
+    }
+
+    public function setLocation(?string $location): self
+    {
+        $this->location = $location;
+
+        return $this;
+    }
+
 }

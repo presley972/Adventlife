@@ -3,9 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Evenement;
-use App\Form\Evenement1Type;
+use App\Entity\Group;
+use App\Form\EvenementType;
 use App\Repository\EvenementRepository;
+use App\Service\EvenementService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,7 +29,7 @@ class EvenementController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $evenement = new Evenement();
-        $form = $this->createForm(Evenement1Type::class, $evenement);
+        $form = $this->createForm(EvenementType::class, $evenement);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -42,18 +45,43 @@ class EvenementController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'evenement_show', methods: ['GET'])]
-    public function show(Evenement $evenement): Response
+    #[Route('/group/{group}/evenements/{evenement}', name: 'evenement_show', methods: ['GET'])]
+    public function show(Group $group,Evenement $evenement): Response
     {
+        if (!$group->checkIfUserIsMember($this->getUser()) && $evenement->getSecurity()){
+            $this->redirectToRoute('group_show', ['id' => $group->getId()]);
+        }
+
         return $this->render('evenement/show.html.twig', [
             'evenement' => $evenement,
+            'group' => $group
+        ]);
+    }
+    #[Route('/group/{group}/evenements', name: 'evenement_list_group', methods: ['GET'])]
+    public function listGroup(ManagerRegistry $doctrine,Group $group, EvenementService $evenementService): Response
+    {
+        $user = $this->getUser();
+        $member = $group->checkIfUserIsMember($user);
+
+        $eventsForCalendar = $doctrine->getRepository(Evenement::class)->findByGroupAndMemberResultArray($group->getId(), $member);
+        $events = $evenementService->getPaginatedEvenement($group->getId(), $member);
+        foreach ($eventsForCalendar as $key => $event){
+            $eventsForCalendar[$key]['start'] = $eventsForCalendar[$key]['start']->Format('Y-m-d');
+            $eventsForCalendar[$key]['end'] = $eventsForCalendar[$key]['end']->Format('Y-m-d');
+            $eventsForCalendar[$key]['url'] = $this->generateUrl('evenement_show',['evenement'=> $eventsForCalendar[$key]['id'], 'group'=>$group->getId()]);
+        }
+
+        return $this->render('evenement/group_events_show.html.twig', [
+            'events' => $events,
+            'eventsForCalendar' => $eventsForCalendar,
+            'group' => $group
         ]);
     }
 
     #[Route('/{id}/edit', name: 'evenement_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Evenement $evenement, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createForm(Evenement1Type::class, $evenement);
+        $form = $this->createForm(EvenementType::class, $evenement);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

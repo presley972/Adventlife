@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\Group;
+use App\Entity\GroupCategory;
 use App\Entity\Place;
 use App\Entity\User;
 use FOS\CKEditorBundle\Form\Type\CKEditorType;
@@ -22,6 +23,20 @@ class GroupType extends AbstractType
     {
         $builder
             ->add('title')
+            ->add('groupCategories', EntityType::class, [
+                'class'=> GroupCategory::class,
+                'mapped' => false,
+                'multiple' => true
+            ])
+            ->add('theme', ChoiceType::class, [
+                'choices' => Group::THEME
+            ])
+            ->add('frequence', ChoiceType::class, [
+                'choices' => Group::FREQUENCE
+            ])
+            ->add('location', ChoiceType::class, [
+                'choices' => Group::LOCATIONREUNION
+            ])
             /*->add('members',EntityType::class, [
                 'class' => User::class,
                 'multiple' => true

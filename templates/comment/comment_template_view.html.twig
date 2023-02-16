@@ -1,0 +1,10 @@
+<div class="d-flex flex-row mb-2">
+    {% if comment.owner.profilPicture is defined and comment.owner.profilPicture is not null and comment.owner.profilPicture.image is not null %}
+        <img src="{{ asset('uploads/' ~ comment.owner.profilPicture.image) }}" alt="avatar"
+             width="40" class="rounded-image">
+    {% endif %}
+    <div class="d-flex flex-column ml-2"> <span class="name">{{ comment.owner.firstname ~ ' ' ~  comment.owner.lastname}}</span>
+        <small class="comment-text">{{ comment.description }}</small>
+        <div class="d-flex flex-row align-items-center status"><small>{{ comment.createdAt|date }}</small> </div>
+    </div>
+</div>

@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Prayer index{% endblock %}
+
+{% block body %}
+    <h1>Prayer index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>CreatedAt</th>
+                <th>ModifiedAt</th>
+                <th>Description</th>
+                <th>Security</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for prayer in prayers %}
+            <tr>
+                <td>{{ prayer.id }}</td>
+                <td>{{ prayer.createdAt ? prayer.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ prayer.modifiedAt ? prayer.modifiedAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ prayer.description }}</td>
+                <td>{{ prayer.security ? 'Yes' : 'No' }}</td>
+                <td>
+                    <a href="{{ path('prayer_show', {'id': prayer.id}) }}">show</a>
+                    <a href="{{ path('prayer_edit', {'id': prayer.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('prayer_new') }}">Create new</a>
+{% endblock %}

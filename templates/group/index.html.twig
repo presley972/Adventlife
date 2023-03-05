@@ -1,0 +1,294 @@
+{% extends 'base.html.twig' %}
+
+{% block navigationHeader %}
+{#    <div class="et-hero-tabs-container">#}
+{#        <a class="et-hero-tab" href="#"  data-href="{{path('group_list')}}">Liste des groupes</a>#}
+{#        <a class="et-hero-tab" href="#"  data-href="{{ path('group_new') }}">Créé un groupe</a>#}
+{#        <a class="et-hero-tab" href="#"  data-href="#tab-react">Trouver un groupe</a>#}
+{#        <span class="et-hero-tab-slider"></span>#}
+{#    </div>#}
+{% endblock %}
+
+{% block body %}
+    <section>
+        <div class="py-5">
+            <div class="row" style="width: 100%;">
+                <h2 class="add_new_group_title" style="text-align: center">
+                    A la une
+                </h2>
+                <div class="col-lg-12" style="margin-left: auto; margin-right: auto;">
+                    <div class="container-groups">
+
+                        {% set group = groups|first %}
+
+                        {% if not group.checkIfUserIsBlocked(app.user.id) %}
+
+                            <div class="Card" style="margin-left: auto; margin-right: auto;">
+                                <div class="Card-image" {% if group.image %} style="background-image: url({{ asset('uploads/' ~ group.image.image) }});"{% endif %}></div>
+                                <div class="Card-body">
+                                    <div class="GROUPE">
+                                        <div class="millefeuille MF-top-part">
+                                            <div class="MF-top-part-LEFT">
+                                                <span class="material-icons">place</span>
+                                                <div>{% if group.place %} {{group.place.adress}} {% endif %}</div>
+                                            </div>
+                                            <div class="MF-top-part-RIGHT">
+                                                <span class="material-icons">groups</span>
+                                                <div> {{ group.members|length }} membres</div>
+                                            </div>
+                                        </div>
+                                        <div class="millefeuille MF-middle-part">
+                                            <div class="MF-middle-part25">
+                                                <div class="part25-left">type :</div>
+                                                <div class="part25-right"> {% for category in group.GroupCategories %} {{ category.title}} {% endfor %}</div>
+                                            </div>
+                                            <div class="MF-middle-part25">
+                                                <div class="part25-left">réunion :</div>
+                                                <div class="part25-right">{{ group.location }}</div>
+                                            </div>
+                                            <div class="MF-middle-part25">
+                                                <div class="part25-left">thème :</div>
+                                                <div class="part25-right"> {{ group.theme }}</div>
+                                            </div>
+                                            <div class="MF-middle-part25">
+                                                <div class="part25-left">fréquence :</div>
+                                                <div class="part25-right"> {{ group.frequence }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="millefeuille MF-bottom-part">
+                                            <div class="MF-bottom-part75">
+                                                <div class="MF-bottom-part75-title">
+                                                    <span class="material-icons">groups</span>
+                                                    <div>{{ group.title }}</div>
+                                                </div>
+                                                <div class="MF-bottom-part75-text">
+                                                    {{ group.description|raw }}
+                                                </div>
+                                            </div>
+                                            <div class="MF-bottom-part25">
+                                                <div class="btn">
+                                                    <a href=" {{ path('group_show', {'id': group.id}) }}"> voir</a>
+                                                </div>
+                                                {% if not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
+                                                    <div class="btn">
+                                                        <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class=" btn-subscription"> Rejoindre ce groupe</a>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+    <section>
+        <div class="row" style="width: 100%;">
+            <div class="col-lg-12">
+
+                <div id="map" style="width: 100%; height: 400px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <section >
+        <div class=" MAIN-container py-5">
+{#            <div class="row" style="width: 80%;">#}
+{#                <div class="col">#}
+{#                    <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4" style="display: flex; justify-content: space-between;">#}
+{#                        <ol class="breadcrumb mb-0">#}
+{#                            <li class="breadcrumb-item"><a href="{{ path('home') }}">Accueil</a></li>#}
+{#                            <li class="breadcrumb-item active" aria-current="page">Liste des groupes</li>#}
+{#                        </ol>#}
+{#                        {% if is_granted('IS_AUTHENTICATED_FULLY') %}#}
+{#                            <div>#}
+{#                                <a href="{{ path('group_new') }}" class="btn btn-secondary btn-subscription"> Créer un groupe</a>#}
+{#                                {% if is_granted('ROLE_SUPER_ADMIN') %}#}
+{#                                    <a href="{{ path('group_category_new') }}" class="btn btn-secondary btn-subscription"> Créer une categorie</a>#}
+{#                                {% endif %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+
+
+{#                    </nav>#}
+{#                </div>#}
+{#            </div>#}
+            <div class="row">
+                <div class="col-lg-2">
+                    <div class="card mb-3">
+                        <div class="card-body text-center">
+
+                            <h5 class="my-3">Verset du jour</h5>
+                            <div id="dailyVersesWrapper"></div>
+                            <script async defer src="https://dailyverses.net/get/verse.js?language=sg21"></script>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-10">
+                    <div class="container-groups">
+
+                        {% for group in groups %}
+                            {% if not group.checkIfUserIsBlocked(app.user.id) %}
+                                <div class="GROUPE">
+                                    <div class="millefeuille MF-top-part">
+                                        <div class="MF-top-part-LEFT">
+                                            <span class="material-icons">place</span>
+                                            <div>{% if group.place %} {{group.place.adress}} {% endif %}</div>
+                                        </div>
+                                        <div class="MF-top-part-RIGHT">
+                                            <span class="material-icons">groups</span>
+                                            <div> {{ group.members|length }} membres</div>
+                                        </div>
+                                    </div>
+                                    <div class="millefeuille MF-middle-part">
+                                        <div class="MF-middle-part25">
+                                            <div class="part25-left">type :</div>
+                                            <div class="part25-right"> {% for category in group.GroupCategories %} {{ category.title}} {% endfor %}</div>
+                                        </div>
+                                        <div class="MF-middle-part25">
+                                            <div class="part25-left">réunion :</div>
+                                            <div class="part25-right">{{ group.location }}</div>
+                                        </div>
+                                        <div class="MF-middle-part25">
+                                            <div class="part25-left">thème :</div>
+                                            <div class="part25-right"> {{ group.theme }}</div>
+                                        </div>
+                                        <div class="MF-middle-part25">
+                                            <div class="part25-left">fréquence :</div>
+                                            <div class="part25-right"> {{ group.frequence }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="millefeuille MF-bottom-part">
+                                        <div class="MF-bottom-part75">
+                                            <div class="MF-bottom-part75-title">
+                                                <span class="material-icons">groups</span>
+                                                <div>{{ group.title }}</div>
+                                            </div>
+                                            <div class="MF-bottom-part75-text">
+                                                {{ group.description|raw }}
+                                            </div>
+                                        </div>
+                                        <div class="MF-bottom-part25">
+                                            <div class="btn">
+                                                <a href=" {{ path('group_show', {'id': group.id}) }}"> voir</a>
+                                            </div>
+                                            {% if not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
+                                                <div class="btn">
+                                                    <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class=" btn-subscription"> Rejoindre ce groupe</a>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+{#                                <div class="Card">#}
+{#                                    <div class="Card-image" {% if group.image %} style="background-image: url({{ asset('uploads/' ~ group.image.image) }});"{% endif %}></div>#}
+{#                                    <div class="Card-body">#}
+{#                                        <h1 class="Card-title">{{ group.title }}</h1>#}
+{#                                        <p class="Card-description">#}
+{#                                            #}{#                    {{ group.description | raw }}#}
+{#                                            {{ group.description|striptags|slice(0, 40) }}#}
+{#                                        </p>#}
+{#                                        <div class="card-btn-container">#}
+{#                                            {% if not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}#}
+{#                                                <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class="btn btn-light btn-success btn-subscription"> Abonnez-vous</a>#}
+{#                                            {% endif %}#}
+{#                                            <a href=" {{ path('group_show', {'id': group.id}) }}" class="btn btn-secondary btn-subscription"> Accedez</a>#}
+{#                                        </div>#}
+{#                                        #}{#                <div class="card-footer text-muted">#}
+{#                                        #}{#                    {{ group.owner.email }}#}
+{#                                        #}{#                </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+
+                            {% endif %}
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="d-flex align-items-center justify-content-center">
+                    <a href="#" data-href="{{ path('group_list_page', {'page' : 2}) }}" class="button js-load-more"> Plus de groupes</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready(function (){
+            $(document).on('click','.btn-subscription', function (){
+                var url = $(this).attr("data-href");
+                fetch(url, {
+                    method: "POST",
+                    headers: {'Content-Type': 'application/json'},
+                }).then(res => {
+                    console.log("Request complete! response:", res);
+                });
+            });
+
+            mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
+            let map = new mapboxgl.Map({
+                container: 'map', // container ID
+                style: 'mapbox://styles/mapbox/streets-v11', // style URL
+                center: [-24, 42], // starting center in [lng, lat]
+                //zoom: 1, // starting zoom
+                projection: 'globe' // display map as a 3D globe
+            });
+
+            map.on('style.load', () => {
+                map.setFog({}); // Set the default atmosphere style
+            });
+
+            // Add geolocate control to the map.
+            map.addControl(
+                new mapboxgl.GeolocateControl({
+                    positionOptions: {
+                        enableHighAccuracy: true
+                    },
+                    // When active the map will receive updates to the device's location as it changes.
+                    trackUserLocation: true,
+                    // Draw an arrow next to the location dot to indicate which direction the device is heading.
+                    showUserHeading: true
+                })
+            );
+            {% for place in places %}
+                {% if place %}
+                    new mapboxgl.Marker().setLngLat(['{{ place.lng }}', '{{ place.lat }}']).setPopup(new mapboxgl.Popup().setHTML({% include 'group/group_map_view.html.twig' %})).addTo(map);
+                {% endif %}
+            {% endfor %}
+
+            $(document).on('click', '.js-load-more', function (e){
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                var url = $(this).attr("data-href");
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    success: function (data) {
+                        $(document).find('.container-groups').append(data.html)
+                        $(document).find('.js-load-more').attr("data-href", "{{ path('group_list_page', {'page' : 'intToChange'}) }}");
+                        var newUrl = $(document).find('.js-load-more').attr("data-href").replace('intToChange', data.page);
+                        $(document).find('.js-load-more').attr("data-href", newUrl);
+                    }
+                });
+            });
+        })
+    </script>
+{% endblock %}
+

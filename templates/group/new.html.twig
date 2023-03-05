@@ -1,0 +1,130 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Add Group{% endblock %}
+
+{% block body %}
+    <section>
+        <div class="container py-5">
+
+            <div class="row">
+                <div class="col-lg-3" style="margin-top: 15%;">
+                    <div class=" mb-3">
+                        <div class="text-center">
+                            <div id="map" style="width: 100%; height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-9">
+                    <div class="add_new_group_header">
+                        <h2 class="add_new_group_title">
+                            Créer votre groupe
+                        </h2>
+                        <div class="btn_container">
+                            <a class="btn back" href="{{ path('group_index') }}" style="background-color: #c92240; color: white; padding: 7px 10px; ">back to list</a>
+                            <a href="#" class="btn" style="background-color: #66B1F1; color: white; padding: 7px 10px; "
+                            >{{ button_label|default('Save') }}</a>
+
+                        </div>
+                        {{ include('group/_form.html.twig') }}
+
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+
+        $(document).ready(function (){
+            var url = "https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js";
+            $.getScript( url, function() {
+                const map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/streets-v11',
+                    center: [-79.4512, 43.6568],
+                    zoom: 13
+                });
+
+                var geocoder = new MapboxGeocoder({
+                    accessToken: mapboxgl.accessToken,
+                    mapboxgl: mapboxgl,
+                    types: 'country,region,place,postcode,locality,neighborhood,district,address,poi'
+                });
+                // Add the control to the map.
+                map.addControl(
+                    geocoder
+                );
+                geocoder.on('result', (e) => {
+                    console.log(e.result);
+                    const featureCollection = e.result;
+                    //console.log(featureCollection.features[0].properties);
+                    const lng = featureCollection.geometry.coordinates[0];
+                    const lat = featureCollection.geometry.coordinates[1];
+                    // const streetNumber = featureCollection.features[0].properties.address_number;
+                    const id = featureCollection.id;
+                    // const street = featureCollection.features[0].properties.street;
+                    // const address_level2 = featureCollection.features[0].properties.address_level2;
+                    const address = featureCollection.place_name;
+                    const address_level1 = featureCollection.text;
+                    // const country = featureCollection.features[0].properties.country;
+                    // const postcode = featureCollection.features[0].properties.postcode;
+                    console.log(lng);
+                    console.log(lat);
+                    //console.log(streetNumber);
+                    console.log(id);
+                    //console.log(street);
+
+                    $(document).find('#group_place_lat').val(lat);
+                    $(document).find('#group_place_lng').val(lng);
+                    // $(document).find('#group_place_country').val(country);
+                    // $(document).find('#group_place_zipCode').val(postcode);
+                    // $(document).find('#group_place_locality').val(address_level2);
+                    $(document).find('#group_place_areaRegion').val(address_level1);
+                    // $(document).find('#group_place_street').val(street);
+                    // $(document).find('#group_place_streetNumber').val(streetNumber);
+                    $(document).find('#group_place_placeId').val(id);
+                    $(document).find('#group_place_Adress').val(address);
+                });
+            });
+            $(document).on('click', '.btn:not(.back)', function (e){
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                console.log('ici la mon gars');
+                var form = $(document).find('form')[0];
+                console.log(form)
+                var url = "{{ path('group_new') }}";
+                var data = new FormData(form);
+                //var data = new form.serialize();
+
+                console.log(url);
+                console.log(data);
+
+                $.ajax({
+                    type: "POST",
+                    processData: false,                          // Using FormData, no need to process data.
+                    contentType:false,
+                    url: url,
+                    data: data,
+                    success: function (data) {
+                        console.log(data);
+                        window.location.replace(data.url);
+                    }
+                });
+
+            });
+            $("select").selectize();
+        })
+    </script>
+
+{% endblock %}
+
+

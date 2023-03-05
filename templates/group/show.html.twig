@@ -1,0 +1,259 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Group{% endblock %}
+{% block mainHeader %}
+    <div
+        class="text-center bg-image"
+        {% if group.image is defined and group.image is not null and group.image.image is not null %}
+            style="background-image: url('{{ asset('uploads/' ~ group.image.image) }}'); height: 200px"
+        {% endif %}
+    >
+    </div>
+
+{% endblock %}
+
+{% block body %}
+
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800&display=swap");
+        body{font-family: "Poppins", sans-serif;font-weight: 300}
+        .card{border:none}
+        .ellipsis{color: #a09c9c}
+        hr{color: #a09c9c;margin-top: 4px;margin-bottom: 8px}
+        .muted-color{color: #a09c9c;font-size: 13px}
+        .ellipsis i{margin-top: 3px;cursor: pointer}
+        .icons i{font-size: 25px}
+        .icons .fa-heart{color: red}
+        .icons .fa-smile-o{color: yellow;font-size: 29px}
+        .rounded-image{border-radius: 50%!important;display: flex;justify-content: center;align-items: center;height: 50px;width: 50px}
+        .name{font-weight: 600}
+        .comment-text{font-size: 12px}
+        .status small{margin-right: 10px;color: blue}
+        .form-control{border-radius: 26px}
+        .comment-input{position: relative}
+        .fonts{position: absolute;right: 13px;top:8px;color: #a09c9c}
+        .form-control:focus{color: #495057;background-color: #fff;border-color: #8bbafe;outline: 0;box-shadow: none}
+
+        .fc-toolbar-chunk{
+            font-size: 10px;
+        }
+
+        #map { width: 100%; height: 400px; box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;  }
+        #calendrier { width: 100%; height: 400px; box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px; padding: 7px; }
+    </style>
+    <section>
+        <div class="container py-5">
+            <div class="row">
+                <div class="col">
+                    <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4" style="display: flex; justify-content: space-between;">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('home') }}">Accueil</a></li>
+                            <li class="breadcrumb-item"><a href="{{ path('group_index') }}">Liste des groupes</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">{{ group.title }}</li>
+                        </ol>
+                        {% if group.checkIfUserIsMember(app.user) %}
+                            <div>
+                                <a href="{{ path('group_blog_post_new', { 'id': group.id}) }}" class="btn btn-secondary btn-subscription"> Post</a>
+                                <a href="{{ path('evenement_list_group', { 'group': group.id}) }}" class="btn btn-secondary btn-subscription"> Evenements</a>
+                                <a href="{{ path('prayer_list_group', { 'group': group.id}) }}" class="btn btn-secondary btn-subscription"> Requete de prière</a>
+                                {% if group.owner.id is same as(app.user.id) or  is_granted('ROLE_SUPER_ADMIN')%}
+                                    <a href="{{ path('group_edit', {'id': group.id}) }}" class="btn btn-secondary ">edition du group</a>
+                                    {{ include('group/_delete_form.html.twig') }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+
+                    </nav>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4">
+                    {% if group.place %}
+                        <div class=" mb-4">
+                            <div class="text-center">
+                                <div id="map"></div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <div class="card mb-4 mb-lg-0">
+                        <div id="calendrier" data-events="{{ events| json_encode }}"></div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    {% for post in group.blogPosts %}
+                        {% if not post.security or (post.security and group.checkIfUserIsMember(app.user)) or group.owner.id is same as(app.user.id)%}
+                            <div class="row d-flex align-items-center justify-content-center">
+                                <div class="col-md-11" style=" margin-bottom: 15px;">
+                                    <div class="card" style="box-shadow: 0px 0px 13px 8px rgba(0, 0, 0, 0.1);">
+                                        <div class="d-flex justify-content-between p-3 px-3">
+                                            <div class="d-flex flex-row align-items-center">
+                                                {% if post.owner.profilPicture is defined and post.owner.profilPicture is not null and post.owner.profilPicture.image is not null %}
+                                                    {#                                style="background-image: url('{{ asset('uploads/' ~ group.image.image) }}'); height: 200px"#}
+                                                    <img src="{{ asset('uploads/' ~ post.owner.profilPicture.image) }}" alt="avatar"
+                                                         width="50" class="rounded-circle">
+                                                {% endif %}
+                                                <div class="d-flex flex-column ml-2"> <span class="font-weight-bold"><a href="{{ path('user_show', {'id': post.owner.id}) }}">{% if post.owner.firstname %}{{ post.owner.firstname ~' '~ post.owner.lastname }}{% else %} {{ post.owner.email }}{% endif %}</a></span> <small class="text-primary">{{ post.name }}</small> </div>
+                                            </div>
+                                            <div class="d-flex flex-row mt-1 ellipsis"> <small class="mr-2">{{ post.createdAt | date}}</small> <i class="fa fa-ellipsis-h"></i> </div>
+                                        </div>
+                                        {% for image in post.images %}
+                                            {% if image is defined and image is not null    %}
+                                                <img src="{{ asset('uploads/' ~ image.image) }}" class="img-fluid" alt="...">
+
+                                            {% endif %}
+                                        {% endfor %}
+                                        <div class="p-3">
+                                            <p class="text-justify">{{ post.description | raw}}</p>
+                                            <hr>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="d-flex flex-row icons d-flex align-items-center"> <i class="fa fa-heart"></i> <i class="fa fa-smile-o ml-2"></i> </div>
+                                                <div class="d-flex flex-row muted-color"> <span class="countComments">{{ post.comments| length ~ ' '}} commmentaires</span> {#<span class="ml-2">Share</span>#} </div>
+                                            </div>
+                                            <hr>
+                                            <div class="comments">
+                                                {% if comments[post.id] is defined %}
+                                                    {% for comment in comments[post.id] %}
+                                                        <div class="d-flex flex-row mb-2">
+                                                            {% if comment.owner.profilPicture is defined and comment.owner.profilPicture is not null and comment.owner.profilPicture.image is not null %}
+                                                                <img src="{{ asset('uploads/' ~ comment.owner.profilPicture.image) }}" alt="avatar"
+                                                                     width="40" class="rounded-image">
+                                                            {% endif %}
+                                                            <div class="d-flex flex-column ml-2"> <span class="name">{{ comment.owner.firstname ~ ' ' ~  comment.owner.lastname}}</span>
+                                                                <small class="comment-text">{{ comment.description }}</small>
+                                                                <div class="d-flex flex-row align-items-center status"><small>{{ comment.createdAt|date }}</small> </div>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+
+                                                {% endif %}
+
+                                            </div>
+                                            <div class="d-flex align-items-center justify-content-center">
+                                                <a href="#" data-href="{{ path('comment_list_page', {'page' : 2, 'blogPost': post.id}) }}" class="button-comment-more js-load-more"> Plus de commentaires</a>
+                                            </div>
+                                            <div class="comment-input">
+                                                <input data-url="{{ path('comment_add_ajax', {'post': post.id}) }}" type="text" name="comment[description]" class="form-control commentField">
+                                                <div class="fonts"> <i class="fa fa-camera"></i> </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% endif %}
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+
+        $( document ).ready(function() {
+            $(document).find('.commentField').on('keyup', function (e) {
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    var url = $(this).attr('data-url');
+
+                    console.log($(this));
+                    console.log($(this).closest('.comment-input'));
+                    var container =  $(this).closest('.p-3');
+                    var containerComments =  container.find('.comments');
+
+                    $.ajax({
+                        type: "POST",
+                        url: url,
+                        data: $(this).serialize(),
+                        success: function (data) {
+                            console.log(container);
+                            containerComments.prepend(data.html);
+                            container.find('.countComments').text(data.commentCount + ' commmentaires' );
+                        }
+                    });
+                }
+            });
+        });
+
+        {% if group.place %}
+        mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
+        const mapboxClient = mapboxSdk({ accessToken: mapboxgl.accessToken });
+        mapboxClient.geocoding
+            .forwardGeocode({
+                query: '{{ group.place.adress ~ ' ' ~ group.place.locality ~ ' ' ~ group.place.country }}',
+                autocomplete: false,
+                limit: 1
+            })
+            .send()
+            .then((response) => {
+                if (
+                    !response ||
+                    !response.body ||
+                    !response.body.features ||
+                    !response.body.features.length
+                ) {
+                    console.error('Invalid response:');
+                    console.error(response);
+                    return;
+                }
+                const feature = response.body.features[0];
+
+                const map = new mapboxgl.Map({
+                    container: 'map',
+                    style: 'mapbox://styles/mapbox/streets-v11',
+                    center: feature.center,
+                    zoom: 10
+                });
+
+// Create a marker and add it to the map.
+                new mapboxgl.Marker().setLngLat(['{{ group.place.lng }}', '{{ group.place.lat }}']).setPopup(new mapboxgl.Popup().setHTML("<h1>{{ group.place.adress }}</h1>")).addTo(map);
+            });
+        {% endif %}
+        window.onload = () => {
+            // On va chercher la div dans le HTML
+            let calendarEl = document.getElementById('calendrier');
+            let evenements = [];
+            let evenement = {};
+            {% for event in group.evenements  %}
+            evenement = {
+                "title":"{{ event.title }}",
+                "start":"{{ event.start |date('Y-m-d') }}",
+                "end":"{{ event.endAt |date('Y-m-d') }}"};
+
+            evenements.push(evenement);
+
+            {% endfor %}
+
+
+        }
+
+        $(document).on('click', '.js-load-more', function (e){
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            var url = $(this).attr("data-href");
+            var buttonloardMore = $(this);
+            var container =  $(this).closest('.p-3');
+            var containerComments =  container.find('.comments');
+            $.ajax({
+                type: "POST",
+                url: url,
+                success: function (data) {
+                    containerComments.append(data.html)
+                    buttonloardMore.attr("data-href", "{{ path('comment_list_page', {'page' : 'intToChange','blogPost': 'postIDToChange'}) }}");
+                    var newUrl = buttonloardMore.attr("data-href").replace('intToChange', data.page).replace('postIDToChange',data.blogPost);
+                    buttonloardMore.attr("data-href", newUrl);
+                }
+            });
+        })
+
+
+    </script>
+
+{% endblock %}
+

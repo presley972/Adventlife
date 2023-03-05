@@ -1,0 +1,65 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New GroupCategory{% endblock %}
+
+{% block body %}
+    <section>
+        <div class="container py-5">
+
+            <div class="row">
+                <div class="col-lg-11">
+                    <div class="add_new_group_header">
+                        <h2 class="add_new_group_title">
+                            Créer une categorie
+                        </h2>
+                        <div class="btn_container">
+                            <a class="btn back" href="{{ path('group_index') }}" style="background-color: #c92240; color: white; padding: 7px 10px; ">back to list</a>
+                            <a href="#" class="btn" style="background-color: #66B1F1; color: white; padding: 7px 10px; "
+                            >{{ button_label|default('Save') }}</a>
+
+                        </div>
+                        {{ include('group_category/_form.html.twig') }}
+
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+
+        $(document).on('click', '.btn:not(.back)', function (e){
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            console.log('ici la mon gars');
+            var form = $(document).find('form')[0];
+            console.log(form)
+            var url = "{{ path('group_category_new') }}";
+            var data = new FormData(form);
+            //var data = new form.serialize();
+
+            console.log(url);
+            console.log(data);
+
+            $.ajax({
+                type: "POST",
+                processData: false,                          // Using FormData, no need to process data.
+                contentType:false,
+                url: url,
+                data: data,
+                success: function (data) {
+                    console.log(data);
+                    window.location.replace(data.url);
+                }
+            });
+
+        });
+    </script>
+
+{% endblock %}

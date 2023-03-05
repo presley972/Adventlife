@@ -1,0 +1,161 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    {% for subscription in subscriptions %}
+
+{#        <span style="color: #1a1e21;"> {{ subscription.subscriber.email }}</span><a href="{{ path('my_groups_request_accept', {'group': group.id, 'subscription':subscription.id}) }}"> accepter</a>#}
+
+    {% endfor %}
+    <section style="background-color: #eee;">
+        <div class="container py-5">
+            <div class="row">
+                <div class="col">
+                    <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4" style="display: flex; justify-content: space-between;">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('home') }}">Accueil</a></li>
+                            {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_SUPER_ADMIN') %}
+                                <li class="breadcrumb-item"><a href="{{ path('user_index') }}">Liste des utilisateurs</a></li>
+                            {% endif %}
+                            <li class="breadcrumb-item"><a href="{{ path('user_show', {'id': user.id}) }}">Profil</a></li>
+                            <li class="breadcrumb-item"><a href="{{ path('my_groups') }}">Mes groupes</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Gestion des membres du groupe {{ group.title }}</li>
+
+                        </ol>
+
+                            <a href=" {{ path('group_show', {'id': group.id}) }}" class="btn btn-secondary btn-subscription"> Accedez</a>
+                    </nav>
+
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class="card mb-4">
+                        <div class="card-body text-center">
+                            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp" alt="avatar"
+                                 class="rounded-circle img-fluid" style="width: 150px;">
+                            <h5 class="my-3">{{ user.lastname ~ ' ' ~ user.firstname }}</h5>
+                            <p class="text-muted mb-1">Full Stack Developer</p>
+                            <p class="text-muted mb-4">Bay Area, San Francisco, CA</p>
+                            <div class="d-flex justify-content-center mb-2">
+                                <a href="{{ path('my_groups') }}" class="btn btn-primary">Mes groupes</a>
+                                <button type="button" class="btn btn-outline-primary ms-1">Message</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-body text-center">
+
+                            <h5 class="my-3">Verset du jour</h5>
+                            <div id="dailyVersesWrapper"></div>
+                            <script async defer src="https://dailyverses.net/get/verse.js?language=sg21"></script>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <h5 class="my-3" style="text-align: center">Demande d'adhésion au groupe {{ group.title }}</h5>
+                        <div class="card-body">
+                            <div class="row">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Prenom</th>
+                                        <th>Date de la demande</th>
+                                        <th>Statut du Groupe</th>
+                                        <th>Statut Demande</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for subscription in subscriptions %}
+                                        <tr>
+                                            <td>{% if subscription.subscriber.lastname %}<a href="{{ path('user_show', {'id': subscription.subscriber.id}) }}">{{ subscription.subscriber.lastname }}</a>{% else %}<a href="{{ path('user_show', {'id': subscription.subscriber.id}) }}">{{ subscription.subscriber.email }}</a>{% endif %}</td>
+                                            <td>{% if subscription.subscriber.firstname %}{{ subscription.subscriber.firstname }}{% else %}{{ subscription.subscriber.email }}{% endif %}</td>
+                                            <td>{{ subscription.createdAt | date }}</td>
+                                            <td>{{ subscription.groupStatut }}</td>
+                                            <td>{{ subscription.subscriberStatut }}</td>
+                                            <td><a href="{{ path('my_groups_request_accept', {'group': group.id, 'subscription':subscription.id}) }}"> accepter</a>
+                                                <a href="{{ path('my_groups_request_refus', {'group': group.id, 'subscription':subscription.id}) }}"> Refuser</a></td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="4">no records found</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <h5 class="my-3" style="text-align: center">Membre du groupe {{ group.title }}</h5>
+                        <div class="card-body">
+                            <div class="row">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Prenom</th>
+                                        <th>Date d'hadésion</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for member in members %}
+                                        <tr>
+                                            <td>{% if member.lastname %}<a href="{{ path('user_show', {'id': member.id}) }}">{{ member.lastname }}</a>{% else %}<a href="{{ path('user_show', {'id': member.id}) }}">{{ member.email }}</a>{% endif %}</td>
+                                            <td>{% if member.firstname %}{{ member.firstname }}{% else %}{{ member.email }}{% endif %}</td>
+                                            <td>{{ member.dateAccept | date }}</td>
+                                            <td><a href="{{ path('my_groups_request_delete', {'group': group.id, 'subscription':member.idSubscrib}) }}"> supprimer</a></td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="4">no records found</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card mb-4">
+                        <h5 class="my-3" style="text-align: center">Membre bloqué du groupe {{ group.title }}</h5>
+                        <div class="card-body">
+                            <div class="row">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Prenom</th>
+                                        <th>Date d'hadésion</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for member in blockedMembers %}
+                                        <tr>
+                                            <td>{% if member.lastname %}<a href="{{ path('user_show', {'id': member.id}) }}">{{ member.lastname }}</a>{% else %}<a href="{{ path('user_show', {'id': member.id}) }}">{{ member.email }}</a>{% endif %}</td>
+                                            <td>{% if member.firstname %}{{ member.firstname }}{% else %}{{ member.email }}{% endif %}</td>
+                                            <td>{{ member.dateAccept | date }}</td>
+                                            <td><a href="{{ path('my_groups_request_accept', {'group': group.id, 'subscription':member.idSubscrib}) }}"> Acceptez</a></td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="4">no records found</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+{% endblock %}

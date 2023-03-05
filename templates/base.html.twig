@@ -2,18 +2,267 @@
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+        <link href="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet"  href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
         <title>{% block title %}Welcome!{% endblock %}</title>
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/css/selectize.default.min.css"
+            integrity="sha512-pTaEn+6gF1IeWv3W1+7X7eM60TFu/agjgoHmYhAfLEU8Phuf6JKiiE8YmsNC0aCgQv4192s4Vai8YZ6VNM6vyQ=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        />
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
         {# Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX #}
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
+            <!-- Intro settings -->
+            <style>
+                /* Default height for small devices */
+                #intro-example {
+                    height: 200px;
+                }
+
+                /* Height for devices larger than 992px */
+                @media (min-width: 992px) {
+                    #intro-example {
+                        /*height: 600px;*/
+                    }
+                }
+            </style>
         {% endblock %}
 
         {% block javascripts %}
             {{ encore_entry_script_tags('app') }}
+            <script src="https://api.mapbox.com/mapbox-gl-js/v2.9.2/mapbox-gl.js"></script>
+            <script src="https://unpkg.com/@mapbox/mapbox-sdk/umd/mapbox-sdk.min.js"></script>
+            <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+            <script
+                id="search-js"
+                defer
+                src="https://api.mapbox.com/search-js/v1.0.0-beta.12/web.js"
+            >
+            </script>
+            <script
+                src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/js/selectize.min.js"
+                integrity="sha512-IOebNkvA/HZjMM7MxL0NYeLYEalloZ8ckak+NDtOViP7oiYzG5vn6WVXyrJDiJPhl4yRdmNAG49iuLmhkUdVsQ=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer"
+            ></script>
+            <script>
+                const script = document.getElementById('search-js');
+                mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
+
+                script.onload = function() {
+                    mapboxsearch.autofill({
+                        accessToken: mapboxgl.accessToken
+                    }).addEventListener('retrieve', (event) => {
+                        const featureCollection = event.detail;
+                        console.log(featureCollection.features[0].properties);
+                        const lng = featureCollection.features[0].geometry.coordinates[0];
+                        const lat = featureCollection.features[0].geometry.coordinates[1];
+                        const streetNumber = featureCollection.features[0].properties.address_number;
+                        const id = featureCollection.features[0].properties.id;
+                        const street = featureCollection.features[0].properties.street;
+                        const address_level2 = featureCollection.features[0].properties.address_level2;
+                        const address_level1 = featureCollection.features[0].properties.address_level1;
+                        const country = featureCollection.features[0].properties.country;
+                        const postcode = featureCollection.features[0].properties.postcode;
+                        console.log(lng);
+                        console.log(lat);
+                        console.log(streetNumber);
+                        console.log(id);
+                        console.log(street);
+
+                        $(document).find('#group_place_lat').val(lat);
+                        $(document).find('#group_place_lng').val(lng);
+                        $(document).find('#group_place_country').val(country);
+                        $(document).find('#group_place_zipCode').val(postcode);
+                        $(document).find('#group_place_locality').val(address_level2);
+                        $(document).find('#group_place_areaRegion').val(address_level1);
+                        $(document).find('#group_place_street').val(street);
+                        $(document).find('#group_place_streetNumber').val(streetNumber);
+                        $(document).find('#group_place_placeId').val(id);
+                        const inputEl = event.target;
+// ...
+                    });
+
+                };
+
+                $(document).on('click', '.et-hero-tab', function (){
+                    let url = $(this).attr('data-href');
+                    var menuSel = $(this);
+                    $.ajax({
+                        type: "POST",
+                        url: url,
+                        success: function (data) {
+                            $(document).find('.container').empty();
+                            $(document).find('.container').append(data.html);
+                            menuSel.addClass('active');
+                            let width = 0;
+                            let left = 0;
+                            if(menuSel) {
+                                width = menuSel.css('width');
+                                left = menuSel.offset().left;
+                            }
+                            $('.et-hero-tab-slider').css('width', width);
+                            $('.et-hero-tab-slider').css('left', left);
+                        }
+                    });
+                })
+            </script>
+
         {% endblock %}
     </head>
-    <body>
-        {% block body %}{% endblock %}
+    <header>
+
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <div class="container-fluid">
+            <button
+                class="navbar-toggler"
+                type="button"
+                data-mdb-toggle="collapse"
+                data-mdb-target="#navbarExample01"
+                aria-controls="navbarExample01"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+            >
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarExample01">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+{#                    <li class="nav-item active">#}
+{#                        <a class="nav-link" aria-current="page" href="#">Home</a>#}
+{#                    </li>#}
+                    {% if is_granted('IS_AUTHENTICATED_REMEMBERED') %}
+                        {% if is_granted('ROLE_SUPER_ADMIN') %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{path('admin')}}">Tableau de board</a>
+                            </li>
+                        {% endif %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('user_show',{'id': app.user.id}) }}">Profile</a>
+                        </li>
+                        <li class="nav-item active">
+                            <a class="nav-link" href="{{ path('app_logout') }}">Deconnexion</a>
+                        </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="link" href="{{ path('userLogin') }}">Connexion</a>
+                    </li>
+
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Navbar -->
+
+    <!-- Background image -->
+    {% block mainHeader %}
+        <div class="MAIN-header">
+
+            <div class="BG-header-box">
+                <img  class="BG-header" src={% block imgHeader %}"https://www.christianismeaujourdhui.info/wp-content/uploads/sites/3/2021/06/VI_priere-1220176255-1576x0-c-default.jpg"{% endblock %}>
+            </div>
+
+            <div class="MAIN-header-TOP">
+                <div class="MAIN-header-TOP-partSide">
+                    <div>+33 7 68 08 46 44</div>
+                </div>
+                <div class="MAIN-header-TOP-partCenter">
+                    <div>contact@adventlife.fr</div>
+                    <div class="picto-img">
+{#                        <img src="{{ asset('uploads/icons8-seventh-day-adventist-church-50.png') }}">#}
+                    </div>
+                </div>
+                <div class="MAIN-header-TOP-partSide">
+
+                </div>
+            </div>
+
+                <div class="MAIN-header-MIDDLE">
+                <div class="MAIN-header-MIDDLE-logo">
+                    <img src="https://adventlife.fr/adventradio/V5/images/logo-new-radio.png">
+                </div>
+
+                <div class="MAIN-header-MIDDLE-btnBox">
+
+                    <div class="absoluteLINE"></div>
+
+                    <div class="MIDDLE-btnBox-container">
+                        <div class="MIDDLE-btnBox-container-picto">
+                            <div class="picto-img">
+                                <img src="{{ asset('uploads/icons8-microphone-100.png') }}">
+                            </div>
+                            <div class="picto-title menuLink"><a class="nav-link" href="https://adventlife.fr/adventradio/V5/index.html">Radio / Média</a></div>
+                        </div>
+
+                        <div class="MIDDLE-btnBox-container-picto">
+                            <div class="picto-img">
+                                <img src="{{ asset('uploads/icons8-prier-100.png') }}">
+                            </div>
+                            <div class="picto-title menuLink"><a class="nav-link" href="#">Réseau de prière</a></div>
+                        </div>
+
+                        <div class="MIDDLE-btnBox-container-picto">
+                            <div class="picto-img">
+                                <img src="{{ asset('uploads/icons8-page-d’accueil-96.png') }}">
+                            </div>
+                            <div class="picto-title menuLink"><a class="nav-link" href="{{path('group_index')}}">Groupe de maison</a></div>
+                        </div>
+
+                        <div class="MIDDLE-btnBox-container-picto">
+                            <div class="picto-img">
+                                <img src="{{ asset('uploads/icons8-hand-holding-heart-100.png') }}">
+                            </div>
+                            <div class="picto-title menuLink"><a class="nav-link" href="#">réseau troc / partage</a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% block navModul %}
+                <div class="MAIN-header-BOTTOM">
+                    <div class="menuLink"><a href="{{ path('group_index') }}"> liste des groupes</a></div>
+                    <div class="menuLink"><a href="{{ path('group_new') }}"> Créer un groupe</a></div>
+                    <div class="menuLink">trouver un groupe</div>
+
+                </div>
+            {% endblock %}
+
+
+        </div>
+
+    {% endblock %}
+
+    <!-- Background image -->
+    </header>
+    <body class="body" id="body">
+    {% block body %}{% endblock %}
+
     </body>
+    {% block footer %}
+        <footer id="footer" class="text-center text-small">
+        <p class="mb-1">&copy; 2017–2020 Company Name</p>
+        <ul class="list-inline">
+            <li class="list-inline-item">
+                <a href="#">Privacy</a>
+            </li>
+            <li class="list-inline-item">
+                <a href="#">Terms</a>
+            </li>
+            <li class="list-inline-item">
+                <a href="#">Support</a>
+            </li>
+        </ul>
+    </footer>
+    {% endblock %}
+
 </html>

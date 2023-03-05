@@ -1,0 +1,80 @@
+{% for group in groups %}
+    {% if not group.checkIfUserIsBlocked(app.user.id) %}
+        <div class="GROUPE">
+            <div class="millefeuille MF-top-part">
+                <div class="MF-top-part-LEFT">
+                    <span class="material-icons">place</span>
+                    <div>{% if group.place %} {{group.place.adress}} {% endif %}</div>
+                </div>
+                <div class="MF-top-part-RIGHT">
+                    <span class="material-icons">groups</span>
+                    <div> {{ group.members|length }} membres</div>
+                </div>
+            </div>
+            <div class="millefeuille MF-middle-part">
+                <div class="MF-middle-part25">
+                    <div class="part25-left">type :</div>
+                    <div class="part25-right"> {% for category in group.GroupCategories %} {{ category.title}} {% endfor %}</div>
+                </div>
+                <div class="MF-middle-part25">
+                    <div class="part25-left">réunion :</div>
+                    <div class="part25-right">{{ group.location }}</div>
+                </div>
+                <div class="MF-middle-part25">
+                    <div class="part25-left">thème :</div>
+                    <div class="part25-right"> {{ group.theme }}</div>
+                </div>
+                <div class="MF-middle-part25">
+                    <div class="part25-left">fréquence :</div>
+                    <div class="part25-right"> {{ group.frequence }}</div>
+                </div>
+            </div>
+            <div class="millefeuille MF-bottom-part">
+                <div class="MF-bottom-part75">
+                    <div class="MF-bottom-part75-title">
+                        <span class="material-icons">groups</span>
+                        <div>{{ group.title }}</div>
+                    </div>
+                    <div class="MF-bottom-part75-text">
+                        {{ group.description|raw }}
+                    </div>
+                </div>
+                <div class="MF-bottom-part25">
+                    <div class="btn">
+                        <a href=" {{ path('group_show', {'id': group.id}) }}"> voir</a>
+                    </div>
+                    {% if not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
+                        <div class="btn">
+                            <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class=" btn-subscription"> Rejoindre ce groupe</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+    {#<div class="col">
+            <div class="card h-100">
+                {% if group.image %}
+                    <img src="{{ asset('uploads/' ~ group.image.image) }}" class="card-img-top" alt="...">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ group.title }}</h5>
+                    <p class="card-text">{{ group.description | raw }}</p>
+                    <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class="btn btn-primary btn-subscription"> Abonnez-vous</a>
+                    <a href=" {{ path('group_show', {'id': group.id}) }}" class="btn btn-primary btn-subscription"> Accedez</a>
+                </div>
+            </div>
+        </div>#}
+
+        {% if group.place %}
+            <script>
+                new mapboxgl.Marker().setLngLat(['{{ group.place.lng }}', '{{ group.place.lat }}']).setPopup(new mapboxgl.Popup().setHTML("<h1>{{ group.place.adress }}</h1>")).addTo(map);
+
+            </script>
+
+        {% endif %}
+
+{% endfor %}
+

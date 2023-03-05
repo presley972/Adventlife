@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+{% block mainHeader %}
+{% endblock %}
+
+
+{% block title %}Hello UserController!{% endblock %}
+
+{% block body %}
+        <div style="height: inherit" id="test" data-url-login="{{ urlForm }}" data-url-register="{{ urlRegister }}">
+        </div>
+{% endblock %}
+
+{% block javascripts%}
+    {{ parent() }}
+{#    {{ encore_entry_script_tags('presleyTest') }}#}
+    {{ encore_entry_script_tags('presleyTest', attributes={
+        defer: true
+    }) }}
+{% endblock %}

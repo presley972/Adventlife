@@ -10,35 +10,119 @@
 {% endblock %}
 
 {% block body %}
-    <section >
-        <div class=" MAIN-container py-5">
-            <div class="row" style="width: 80%;">
-                <div class="col">
-                    <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4" style="display: flex; justify-content: space-between;">
-                        <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="{{ path('home') }}">Accueil</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Liste des groupes</li>
-                        </ol>
-                        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-                            <div>
-                                <a href="{{ path('group_new') }}" class="btn btn-secondary btn-subscription"> Créer un groupe</a>
-                                {% if is_granted('ROLE_SUPER_ADMIN') %}
-                                    <a href="{{ path('group_category_new') }}" class="btn btn-secondary btn-subscription"> Créer une categorie</a>
-                                {% endif %}
+    <section>
+        <div class="py-5">
+            <div class="row" style="width: 100%;">
+                <h2 class="add_new_group_title" style="text-align: center">
+                    A la une
+                </h2>
+                <div class="col-lg-12" style="margin-left: auto; margin-right: auto;">
+                    <div class="container-groups">
+
+                        {% set group = groups|first %}
+
+                        {% if not group.checkIfUserIsBlocked(app.user.id) %}
+
+                            <div class="Card" style="margin-left: auto; margin-right: auto;">
+                                <div class="Card-image" {% if group.image %} style="background-image: url({{ asset('uploads/' ~ group.image.image) }});"{% endif %}></div>
+                                <div class="Card-body">
+                                    <div class="GROUPE">
+                                        <div class="millefeuille MF-top-part">
+                                            <div class="MF-top-part-LEFT">
+                                                <span class="material-icons">place</span>
+                                                <div>{% if group.place %} {{group.place.adress}} {% endif %}</div>
+                                            </div>
+                                            <div class="MF-top-part-RIGHT">
+                                                <span class="material-icons">groups</span>
+                                                <div> {{ group.members|length }} membres</div>
+                                            </div>
+                                        </div>
+                                        <div class="millefeuille MF-middle-part">
+                                            <div class="MF-middle-part25">
+                                                <div class="part25-left">type :</div>
+                                                <div class="part25-right"> {% for category in group.GroupCategories %} {{ category.title}} {% endfor %}</div>
+                                            </div>
+                                            <div class="MF-middle-part25">
+                                                <div class="part25-left">réunion :</div>
+                                                <div class="part25-right">{{ group.location }}</div>
+                                            </div>
+                                            <div class="MF-middle-part25">
+                                                <div class="part25-left">thème :</div>
+                                                <div class="part25-right"> {{ group.theme }}</div>
+                                            </div>
+                                            <div class="MF-middle-part25">
+                                                <div class="part25-left">fréquence :</div>
+                                                <div class="part25-right"> {{ group.frequence }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="millefeuille MF-bottom-part">
+                                            <div class="MF-bottom-part75">
+                                                <div class="MF-bottom-part75-title">
+                                                    <span class="material-icons">groups</span>
+                                                    <div>{{ group.title }}</div>
+                                                </div>
+                                                <div class="MF-bottom-part75-text">
+                                                    {{ group.description|raw }}
+                                                </div>
+                                            </div>
+                                            <div class="MF-bottom-part25">
+                                                <div class="btn">
+                                                    <a href=" {{ path('group_show', {'id': group.id}) }}"> voir</a>
+                                                </div>
+                                                {% if not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
+                                                    <div class="btn">
+                                                        <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class=" btn-subscription"> Rejoindre ce groupe</a>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
                             </div>
+
                         {% endif %}
 
-
-                    </nav>
+                    </div>
                 </div>
+
             </div>
+
+        </div>
+    </section>
+    <section>
+        <div class="row" style="width: 100%;">
+            <div class="col-lg-12">
+
+                <div id="map" style="width: 100%; height: 400px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <section >
+        <div class=" MAIN-container py-5">
+{#            <div class="row" style="width: 80%;">#}
+{#                <div class="col">#}
+{#                    <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4" style="display: flex; justify-content: space-between;">#}
+{#                        <ol class="breadcrumb mb-0">#}
+{#                            <li class="breadcrumb-item"><a href="{{ path('home') }}">Accueil</a></li>#}
+{#                            <li class="breadcrumb-item active" aria-current="page">Liste des groupes</li>#}
+{#                        </ol>#}
+{#                        {% if is_granted('IS_AUTHENTICATED_FULLY') %}#}
+{#                            <div>#}
+{#                                <a href="{{ path('group_new') }}" class="btn btn-secondary btn-subscription"> Créer un groupe</a>#}
+{#                                {% if is_granted('ROLE_SUPER_ADMIN') %}#}
+{#                                    <a href="{{ path('group_category_new') }}" class="btn btn-secondary btn-subscription"> Créer une categorie</a>#}
+{#                                {% endif %}#}
+{#                            </div>#}
+{#                        {% endif %}#}
+
+
+{#                    </nav>#}
+{#                </div>#}
+{#            </div>#}
             <div class="row">
                 <div class="col-lg-2">
-                    <div class=" mb-3">
-                        <div class="text-center">
-                            <div id="map" style="width: 100%; height: 400px;"></div>
-                        </div>
-                    </div>
                     <div class="card mb-3">
                         <div class="card-body text-center">
 
@@ -183,9 +267,9 @@
                     showUserHeading: true
                 })
             );
-            {% for group in groups %}
-                {% if group.place %}
-                    new mapboxgl.Marker().setLngLat(['{{ group.place.lng }}', '{{ group.place.lat }}']).setPopup(new mapboxgl.Popup().setHTML("<h1>{{ group.place.adress }}</h1>")).addTo(map);
+            {% for place in places %}
+                {% if place %}
+                    new mapboxgl.Marker().setLngLat(['{{ place.lng }}', '{{ place.lat }}']).setPopup(new mapboxgl.Popup().setHTML({% include 'group/group_map_view.html.twig' %})).addTo(map);
                 {% endif %}
             {% endfor %}
 

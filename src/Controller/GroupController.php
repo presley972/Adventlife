@@ -8,15 +8,20 @@ use App\Entity\Group;
 use App\Entity\GroupCategory;
 use App\Entity\Image;
 use App\Entity\Place;
+use App\Entity\Prayer;
 use App\Entity\Subscription;
 use App\Entity\User;
 use App\Form\BlogPostType;
 use App\Form\EvenementType;
 use App\Form\GroupType;
+use App\Form\PrayerType;
 use App\Repository\GroupRepository;
+use App\Repository\PlaceRepository;
 use App\Service\CommentService;
+use App\Service\EvenementService;
 use App\Service\FileUploader;
 use App\Service\GroupService;
+use App\Service\PrayerService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,10 +36,12 @@ use Symfony\Component\Routing\Annotation\Route;
 class GroupController extends AbstractController
 {
     #[Route('/', name: 'group_index', methods: ['GET'])]
-    public function index(GroupService $groupService): Response
+    public function index(GroupService $groupService, PlaceRepository $placeRepository): Response
     {
+        $places = $placeRepository->findPlacesForMapOnListGroup();
 
         return $this->render('group/index.html.twig',[
+            'places' => $places,
             'groups' =>   $groupService->getPaginatedGroups(),
         ]);
     }
@@ -507,6 +514,90 @@ class GroupController extends AbstractController
             'evenement' => $evenement,
             'group' => $group,
             'form' => $form,
+        ]);
+    }
+
+    #[Route('/{group}/evenements', name: 'evenement_list_group', methods: ['GET'])]
+    public function listEventForGroup(ManagerRegistry $doctrine,Group $group, EvenementService $evenementService): Response
+    {
+        $user = $this->getUser();
+        $member = $group->checkIfUserIsMember($user);
+
+        $eventsForCalendar = $doctrine->getRepository(Evenement::class)->findByGroupAndMemberResultArray($group->getId(), $member);
+        $events = $evenementService->getPaginatedEvenement($group->getId(), $member);
+        foreach ($eventsForCalendar as $key => $event){
+            $eventsForCalendar[$key]['start'] = $eventsForCalendar[$key]['start']->Format('Y-m-d');
+            $eventsForCalendar[$key]['end'] = $eventsForCalendar[$key]['end']->Format('Y-m-d');
+            $eventsForCalendar[$key]['url'] = $this->generateUrl('evenement_show',['evenement'=> $eventsForCalendar[$key]['id'], 'group'=>$group->getId()]);
+        }
+
+        return $this->render('evenement/group_events_show.html.twig', [
+            'events' => $events,
+            'eventsForCalendar' => $eventsForCalendar,
+            'group' => $group
+        ]);
+    }
+
+    #[Route('/{id}/prayer/new', name: 'group_prayer_new', methods: ['GET', 'POST'])]
+    public function addGroupPrayer(Request $request, Group $group, EntityManagerInterface $entityManager){
+        $user = $this->getUser();
+        $prayer =  new Prayer();
+        $prayer->setOwner($user);
+        $prayer->setGroupe($group);
+
+
+        $form = $this->createForm(PrayerType::class, $prayer);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            $prayer->setCreatedAt(new \DateTimeImmutable());
+            if ($form->get('place') !== null && $form->get('place')->getData()->getAdress() !== null){
+                $dataPlace = $form->get('place')->getData();
+                $place = new Place();
+                $place->setCreatedAt(new \DateTimeImmutable('now'));
+                $place->setAdress($dataPlace->getAdress());
+                $place->setCountry($dataPlace->getCountry());
+                $place->setZipCode($dataPlace->getZipCode());
+                $place->setLocality($dataPlace->getLocality());
+                $place->setLat($dataPlace->getLat());
+                $place->setLng($dataPlace->getLng());
+                $place->setStreet($dataPlace->getStreet());
+                $place->setStreetNumber($dataPlace->getStreetNumber());
+                $place->setPlaceId($dataPlace->getPlaceId());
+                $place->setAreaRegion($dataPlace->getAreaRegion());
+                $place->addPrayer($prayer);
+                $entityManager->persist($place);
+
+            }
+
+
+            $entityManager->persist($prayer);
+            $entityManager->flush();
+
+            return new JsonResponse([
+                'code' => 'success',
+                'url' => $this->generateUrl('group_show', [ 'id' => $group->getId()])
+            ]);        }
+
+        return $this->renderForm('prayer/new.html.twig', [
+            'prayer' => $prayer,
+            'group' => $group,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/{group}/prayers', name: 'prayer_list_group', methods: ['GET'])]
+    public function listPrayesForGroup(ManagerRegistry $doctrine,Group $group, PrayerService $prayerService): Response
+    {
+        $user = $this->getUser();
+        $member = $group->checkIfUserIsMember($user);
+
+        $prayers = $prayerService->getPaginatedPrayerForGroup($group->getId(), $member);
+
+        return $this->render('prayer/group_prayer_list.html.twig', [
+            'prayers' => $prayers,
+            'group' => $group
         ]);
     }
 }

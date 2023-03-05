@@ -60,10 +60,14 @@ class Place
     #[ORM\OneToMany(mappedBy: 'place', targetEntity: Evenement::class)]
     private $evenements;
 
+    #[ORM\OneToMany(mappedBy: 'place', targetEntity: Prayer::class)]
+    private $prayers;
+
     public function __construct()
     {
         $this->homeGroup = new ArrayCollection();
         $this->evenements = new ArrayCollection();
+        $this->prayers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -282,6 +286,36 @@ class Place
             // set the owning side to null (unless already changed)
             if ($evenement->getPlace() === $this) {
                 $evenement->setPlace(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Prayer[]
+     */
+    public function getPrayers(): Collection
+    {
+        return $this->prayers;
+    }
+
+    public function addPrayer(Prayer $prayer): self
+    {
+        if (!$this->prayers->contains($prayer)) {
+            $this->prayers[] = $prayer;
+            $prayer->setPlace($this);
+        }
+
+        return $this;
+    }
+
+    public function removePrayer(Prayer $prayer): self
+    {
+        if ($this->prayers->removeElement($prayer)) {
+            // set the owning side to null (unless already changed)
+            if ($prayer->getPlace() === $this) {
+                $prayer->setPlace(null);
             }
         }
 

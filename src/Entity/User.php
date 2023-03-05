@@ -81,6 +81,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'userProfilPicture', targetEntity: Image::class, cascade: ['persist', 'remove'])]
     private $profilPicture;
 
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Prayer::class)]
+    private $prayers;
+
+    #[ORM\ManyToMany(targetEntity: Prayer::class, mappedBy: 'membership')]
+    private $membership_prayers;
+
     public function __construct()
     {
         $this->ownerGroups = new ArrayCollection();
@@ -90,6 +96,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->comments = new ArrayCollection();
         $this->evenements = new ArrayCollection();
         $this->subscriber_evenements = new ArrayCollection();
+        $this->prayers = new ArrayCollection();
+        $this->membership_prayers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -496,6 +504,63 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         $this->profilPicture = $image;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Prayer[]
+     */
+    public function getPrayers(): Collection
+    {
+        return $this->prayers;
+    }
+
+    public function addPrayer(Prayer $prayer): self
+    {
+        if (!$this->prayers->contains($prayer)) {
+            $this->prayers[] = $prayer;
+            $prayer->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removePrayer(Prayer $prayer): self
+    {
+        if ($this->prayers->removeElement($prayer)) {
+            // set the owning side to null (unless already changed)
+            if ($prayer->getOwner() === $this) {
+                $prayer->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Prayer[]
+     */
+    public function getMembershipPrayers(): Collection
+    {
+        return $this->membership_prayers;
+    }
+
+    public function addMembershipPrayer(Prayer $membershipPrayer): self
+    {
+        if (!$this->membership_prayers->contains($membershipPrayer)) {
+            $this->membership_prayers[] = $membershipPrayer;
+            $membershipPrayer->addMembership($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMembershipPrayer(Prayer $membershipPrayer): self
+    {
+        if ($this->membership_prayers->removeElement($membershipPrayer)) {
+            $membershipPrayer->removeMembership($this);
+        }
 
         return $this;
     }

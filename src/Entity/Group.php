@@ -62,6 +62,9 @@ class Group
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $location;
 
+    #[ORM\OneToMany(mappedBy: 'groupe', targetEntity: Prayer::class)]
+    private $prayers;
+
     public function __construct()
     {
         $this->members = new ArrayCollection();
@@ -69,6 +72,7 @@ class Group
         $this->blogPosts = new ArrayCollection();
         $this->evenements = new ArrayCollection();
         $this->groupCategories = new ArrayCollection();
+        $this->prayers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -368,6 +372,36 @@ class Group
     public function setLocation(?string $location): self
     {
         $this->location = $location;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Prayer[]
+     */
+    public function getPrayers(): Collection
+    {
+        return $this->prayers;
+    }
+
+    public function addPrayer(Prayer $prayer): self
+    {
+        if (!$this->prayers->contains($prayer)) {
+            $this->prayers[] = $prayer;
+            $prayer->setGroupe($this);
+        }
+
+        return $this;
+    }
+
+    public function removePrayer(Prayer $prayer): self
+    {
+        if ($this->prayers->removeElement($prayer)) {
+            // set the owning side to null (unless already changed)
+            if ($prayer->getGroupe() === $this) {
+                $prayer->setGroupe(null);
+            }
+        }
 
         return $this;
     }

@@ -57,26 +57,6 @@ class EvenementController extends AbstractController
             'group' => $group
         ]);
     }
-    #[Route('/group/{group}/evenements', name: 'evenement_list_group', methods: ['GET'])]
-    public function listGroup(ManagerRegistry $doctrine,Group $group, EvenementService $evenementService): Response
-    {
-        $user = $this->getUser();
-        $member = $group->checkIfUserIsMember($user);
-
-        $eventsForCalendar = $doctrine->getRepository(Evenement::class)->findByGroupAndMemberResultArray($group->getId(), $member);
-        $events = $evenementService->getPaginatedEvenement($group->getId(), $member);
-        foreach ($eventsForCalendar as $key => $event){
-            $eventsForCalendar[$key]['start'] = $eventsForCalendar[$key]['start']->Format('Y-m-d');
-            $eventsForCalendar[$key]['end'] = $eventsForCalendar[$key]['end']->Format('Y-m-d');
-            $eventsForCalendar[$key]['url'] = $this->generateUrl('evenement_show',['evenement'=> $eventsForCalendar[$key]['id'], 'group'=>$group->getId()]);
-        }
-
-        return $this->render('evenement/group_events_show.html.twig', [
-            'events' => $events,
-            'eventsForCalendar' => $eventsForCalendar,
-            'group' => $group
-        ]);
-    }
 
     #[Route('/{id}/edit', name: 'evenement_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Evenement $evenement, EntityManagerInterface $entityManager): Response

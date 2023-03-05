@@ -1,0 +1,179 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ group.title ~ ' evenements' }}{% endblock %}
+{% block mainHeader %}
+    <div
+        class="text-center bg-image"
+        {% if group.image is defined and group.image is not null and group.image.image is not null %}
+            style="background-image: url('{{ asset('uploads/' ~ group.image.image) }}'); height: 200px"
+        {% endif %}
+    >
+    </div>
+
+{% endblock %}
+
+{% block body %}
+
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800&display=swap");
+        body{font-family: "Poppins", sans-serif;font-weight: 300}
+        .card{border:none}
+        .ellipsis{color: #a09c9c}
+        hr{color: #a09c9c;margin-top: 4px;margin-bottom: 8px}
+        .muted-color{color: #a09c9c;font-size: 13px}
+        .ellipsis i{margin-top: 3px;cursor: pointer}
+        .icons i{font-size: 25px}
+        .icons .fa-heart{color: red}
+        .icons .fa-smile-o{color: yellow;font-size: 29px}
+        .rounded-image{border-radius: 50%!important;display: flex;justify-content: center;align-items: center;height: 50px;width: 50px}
+        .name{font-weight: 600}
+        .comment-text{font-size: 12px}
+        .status small{margin-right: 10px;color: blue}
+        .form-control{border-radius: 26px}
+        .comment-input{position: relative}
+        .fonts{position: absolute;right: 13px;top:8px;color: #a09c9c}
+        .form-control:focus{color: #495057;background-color: #fff;border-color: #8bbafe;outline: 0;box-shadow: none}
+
+        .fc-toolbar-chunk{
+            font-size: 10px;
+        }
+
+        #map { width: 100%; height: 400px; box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;  }
+        #calendrier { width: 100%; height: 400px; box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px; padding: 7px; }
+    </style>
+    <section>
+        <div class="container py-5">
+            <div class="row">
+                <div class="col">
+                    <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4" style="display: flex; justify-content: space-between;">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('home') }}">Accueil</a></li>
+                            <li class="breadcrumb-item"><a href="{{ path('group_index') }}">Liste des groupes</a></li>
+                            <li class="breadcrumb-item"><a href="{{ path('group_show', {'id': group.id}) }}">{{ group.title }}</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">evenements</li>
+                        </ol>
+                        {% if group.checkIfUserIsMember(app.user) %}
+                            <div>
+                                <a href="{{ path('group_prayer_new', { 'id': group.id}) }}" class="btn btn-secondary btn-subscription"> Nouveau</a>
+                            </div>
+                        {% endif %}
+
+
+                    </nav>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4">
+                    <div class=" mb-4">
+                        <div class="text-center">
+                            <div id="map"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    {% for prayer in prayers %}
+                        {% if not prayer.security or (prayer.security and group.checkIfUserIsMember(app.user)) or prayer.owner.id is same as(app.user.id)%}
+                            <div class="row d-flex align-items-center justify-content-center">
+                                <div class="col-md-11" style=" margin-bottom: 15px;">
+                                    <div class="card" style="box-shadow: 0px 0px 13px 8px rgba(0, 0, 0, 0.1);">
+                                        <div class="d-flex justify-content-between p-3 px-3">
+                                            <div class="d-flex flex-row align-items-center">
+                                                {% if prayer.owner.profilPicture is defined and prayer.owner.profilPicture is not null and prayer.owner.profilPicture.image is not null %}
+                                                    {#                                style="background-image: url('{{ asset('uploads/' ~ group.image.image) }}'); height: 200px"#}
+                                                    <img src="{{ asset('uploads/' ~ prayer.owner.profilPicture.image) }}" alt="avatar"
+                                                         width="50" class="rounded-circle">
+                                                {% endif %}
+                                                <div class="d-flex flex-column ml-2"> <span class="font-weight-bold"><a href="{{ path('user_show', {'id': prayer.owner.id}) }}">{% if prayer.owner.firstname %}{{ prayer.owner.firstname ~' '~ prayer.owner.lastname }}{% else %} {{ prayer.owner.email }}{% endif %}</a></span> <small class="text-primary"></small> </div>
+                                            </div>
+                                            <div class="d-flex flex-row mt-1 ellipsis"> <small class="mr-2">{{ prayer.createdAt | date}}</small> <i class="fa fa-ellipsis-h"></i> </div>
+                                        </div>
+                                        {#                                        {% for image in event.images %}#}
+                                        {#                                            {% if image is defined and image is not null    %}#}
+                                        {#                                                <img src="{{ asset('uploads/' ~ image.image) }}" class="img-fluid" alt="...">#}
+
+                                        {#                                            {% endif %}#}
+                                        {#                                        {% endfor %}#}
+                                        <div class="p-3">
+                                            <p class="text-justify">{{ prayer.description | raw}}</p>
+                                            <hr>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="d-flex align-items-center justify-content-center">
+                        {#                        <a href="#" data-href="{{ path('comment_list_page', {'page' : 2, 'blogPost': post.id}) }}" class="button-comment-more js-load-more"> Load More</a>#}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+
+        $( document ).ready(function() {
+
+
+            mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
+            let map = new mapboxgl.Map({
+                container: 'map', // container ID
+                style: 'mapbox://styles/mapbox/streets-v11', // style URL
+                center: [-24, 42], // starting center in [lng, lat]
+                //zoom: 1, // starting zoom
+                projection: 'globe' // display map as a 3D globe
+            });
+
+            map.on('style.load', () => {
+                map.setFog({}); // Set the default atmosphere style
+            });
+
+            // Add geolocate control to the map.
+            map.addControl(
+                new mapboxgl.GeolocateControl({
+                    positionOptions: {
+                        enableHighAccuracy: true
+                    },
+                    // When active the map will receive updates to the device's location as it changes.
+                    trackUserLocation: true,
+                    // Draw an arrow next to the location dot to indicate which direction the device is heading.
+                    showUserHeading: true
+                })
+            );
+            {% for prayer in prayers %}
+                {% if prayer.place %}
+                    // a faire une requet pour avoir tous les evenements sur la map
+                    new mapboxgl.Marker().setLngLat(['{{ prayer.place.lng }}', '{{ prayer.place.lat }}']).setPopup(new mapboxgl.Popup().setHTML("<h1>{{ prayer.place.adress }}</h1>")).addTo(map);
+                {% endif %}
+            {% endfor %}
+
+            $(document).on('click', '.js-load-more', function (e){
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                var url = $(this).attr("data-href");
+                var buttonloardMore = $(this);
+                var container =  $(this).closest('.p-3');
+                var containerComments =  container.find('.comments');
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    success: function (data) {
+                        containerComments.append(data.html)
+                        buttonloardMore.attr("data-href", "{{ path('comment_list_page', {'page' : 'intToChange','blogPost': 'postIDToChange'}) }}");
+                        var newUrl = buttonloardMore.attr("data-href").replace('intToChange', data.page).replace('postIDToChange',data.blogPost);
+                        buttonloardMore.attr("data-href", newUrl);
+                    }
+                });
+            })
+        });
+
+    </script>
+
+{% endblock %}
+

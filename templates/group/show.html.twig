@@ -55,6 +55,7 @@
                             <div>
                                 <a href="{{ path('group_blog_post_new', { 'id': group.id}) }}" class="btn btn-secondary btn-subscription"> Post</a>
                                 <a href="{{ path('evenement_list_group', { 'group': group.id}) }}" class="btn btn-secondary btn-subscription"> Evenements</a>
+                                <a href="{{ path('prayer_list_group', { 'group': group.id}) }}" class="btn btn-secondary btn-subscription"> Requete de prière</a>
                                 {% if group.owner.id is same as(app.user.id) or  is_granted('ROLE_SUPER_ADMIN')%}
                                     <a href="{{ path('group_edit', {'id': group.id}) }}" class="btn btn-secondary ">edition du group</a>
                                     {{ include('group/_delete_form.html.twig') }}

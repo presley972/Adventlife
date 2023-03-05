@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Prayer{% endblock %}
+
+{% block body %}
+    <h1>Edit Prayer</h1>
+
+    {{ include('prayer/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('prayer_index') }}">back to list</a>
+
+    {{ include('prayer/_delete_form.html.twig') }}
+{% endblock %}

@@ -21,7 +21,7 @@ final class Version20230205172003 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql('ALTER TABLE image ADD user_profil_picture_id INT DEFAULT NULL');
-        $this->addSql('ALTER TABLE image DROP user_profil_picture');
+        //$this->addSql('ALTER TABLE image DROP user_profil_picture');
         $this->addSql('ALTER TABLE image ADD CONSTRAINT FK_C53D045F2D9C5D6A FOREIGN KEY (user_profil_picture_id) REFERENCES "user" (id) NOT DEFERRABLE INITIALLY IMMEDIATE');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_C53D045F2D9C5D6A ON image (user_profil_picture_id)');
     }
@@ -32,7 +32,7 @@ final class Version20230205172003 extends AbstractMigration
         $this->addSql('CREATE SCHEMA public');
         $this->addSql('ALTER TABLE image DROP CONSTRAINT FK_C53D045F2D9C5D6A');
         $this->addSql('DROP INDEX UNIQ_C53D045F2D9C5D6A');
-        $this->addSql('ALTER TABLE image ADD user_profil_picture VARCHAR(255) DEFAULT NULL');
+        //$this->addSql('ALTER TABLE image ADD user_profil_picture VARCHAR(255) DEFAULT NULL');
         $this->addSql('ALTER TABLE image DROP user_profil_picture_id');
     }
 }

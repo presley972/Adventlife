@@ -98,6 +98,11 @@
                                             <p class="text-justify">{{ prayer.description | raw}}</p>
                                             <hr>
                                         </div>
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <a href="#" data-href=" {{ path('prayer_membership_request', {'id': prayer.id}) }}" class=" btn-subscription"> Je m'engage à prier</a>
+                                            <div style="margin: 3px"> {{ prayer.membership|length }}</div>
+                                            <span class="material-icons">sign_language</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

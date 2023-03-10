@@ -1,41 +1,279 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Prayer index{% endblock %}
+{% block navigationHeader %}
+    {#    <div class="et-hero-tabs-container">#}
+    {#        <a class="et-hero-tab" href="#"  data-href="{{path('group_list')}}">Liste des groupes</a>#}
+    {#        <a class="et-hero-tab" href="#"  data-href="{{ path('group_new') }}">Créé un groupe</a>#}
+    {#        <a class="et-hero-tab" href="#"  data-href="#tab-react">Trouver un groupe</a>#}
+    {#        <span class="et-hero-tab-slider"></span>#}
+    {#    </div>#}
+{% endblock %}
 
 {% block body %}
-    <h1>Prayer index</h1>
+    <section>
+        <div class="py-5">
+            <div class="row" style="width: 80%; margin: auto;">
+                <div class="col">
+                    <nav aria-label="breadcrumb" class="bg-light rounded-3 p-3 mb-4" style="display: flex; justify-content: space-between;">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item"><a href="{{ path('home') }}">Accueil</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">Liste des prières</li>
+                        </ol>
+                        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                            <div>
+                                <a href="{{ path('prayer_new') }}" class="btn btn-secondary btn-subscription"> Créer une prière</a>
+                                {#                                            {% if is_granted('ROLE_SUPER_ADMIN') %}#}
+                                {#                                                <a href="{{ path('group_category_new') }}" class="btn btn-secondary btn-subscription"> Créer une categorie</a>#}
+                                {#                                            {% endif %}#}
+                            </div>
+                        {% endif %}
+                    </nav>
+                </div>
+            </div>
+            <div class="row" style="width: 100%;">
+                <h2 class="add_new_group_title" style="text-align: center">
+                    A la une
+                </h2>
+                <div class="col-lg-12" style="margin-left: auto; margin-right: auto;">
+                    <div class="container-groups">
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>CreatedAt</th>
-                <th>ModifiedAt</th>
-                <th>Description</th>
-                <th>Security</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for prayer in prayers %}
-            <tr>
-                <td>{{ prayer.id }}</td>
-                <td>{{ prayer.createdAt ? prayer.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ prayer.modifiedAt ? prayer.modifiedAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ prayer.description }}</td>
-                <td>{{ prayer.security ? 'Yes' : 'No' }}</td>
-                <td>
-                    <a href="{{ path('prayer_show', {'id': prayer.id}) }}">show</a>
-                    <a href="{{ path('prayer_edit', {'id': prayer.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+                        {% set prais = prayers|first %}
 
-    <a href="{{ path('prayer_new') }}">Create new</a>
+                            <div class="Card" style="margin-left: auto; margin-right: auto;">
+                                <div class="Card-image" {% if prais.owner.profilPicture %} style="background-image: url({{ asset('uploads/' ~ prais.owner.profilPicture.image) }});"{% endif %}></div>
+                                <div class="Card-body">
+                                    <div class="GROUPE">
+                                        <div class="millefeuille MF-top-part">
+                                            <div class="MF-top-part-LEFT">
+                                                <span class="material-icons">place</span>
+                                                <div>{% if prais.place %} {{prais.place.adress}} {% endif %}</div>
+                                            </div>
+                                            <div class="MF-top-part-RIGHT">
+                                                <span class="material-icons">groups</span>
+{#                                                <div> {{ group.members|length }} membres</div>#}
+                                            </div>
+                                        </div>
+{#                                        <div class="millefeuille MF-middle-part">#}
+{#                                            <div class="MF-middle-part25">#}
+{#                                                <div class="part25-left">type :</div>#}
+{#                                                <div class="part25-right"> {% for category in group.GroupCategories %} {{ category.title}} {% endfor %}</div>#}
+{#                                            </div>#}
+{#                                            <div class="MF-middle-part25">#}
+{#                                                <div class="part25-left">réunion :</div>#}
+{#                                                <div class="part25-right">{{ group.location }}</div>#}
+{#                                            </div>#}
+{#                                            <div class="MF-middle-part25">#}
+{#                                                <div class="part25-left">thème :</div>#}
+{#                                                <div class="part25-right"> {{ group.theme }}</div>#}
+{#                                            </div>#}
+{#                                            <div class="MF-middle-part25">#}
+{#                                                <div class="part25-left">fréquence :</div>#}
+{#                                                <div class="part25-right"> {{ group.frequence }}</div>#}
+{#                                            </div>#}
+{#                                        </div>#}
+                                        <div class="millefeuille MF-bottom-part">
+                                            <div class="MF-bottom-part75">
+                                                <div class="MF-bottom-part75-title">
+                                                    <span class="material-icons">groups</span>
+{#                                                    <div>{{ prais.title }}</div>#}
+                                                </div>
+                                                <div class="MF-bottom-part75-text">
+                                                    {{ prais.description|raw }}
+                                                </div>
+                                            </div>
+                                            <div class="MF-bottom-part25">
+                                                <div class="btn">
+                                                    <a href=" {{ path('prayer_show', {'id': prais.id}) }}"> voir</a>
+                                                </div>
+                                                {% if is_granted('IS_AUTHENTICATED_FULLY')  and  prais.owner is not same as(app.user)%}
+                                                    <div class="btn">
+                                                        <a href="#" data-href=" {{ path('subscribe_request', {'group': prais.id}) }}" class=" btn-subscription"> Rejoindre ce groupe</a>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+    <section>
+        <div class="row" style="width: 100%;">
+            <div class="col-lg-12">
+
+                <div id="map" style="width: 100%; height: 400px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <section >
+        <div class=" MAIN-container py-5" style="background-color: #11434a;">
+            <div class="row">
+                <div class="col-lg-2">
+                    <div class="card mb-3">
+                        <div class="card-body text-center">
+
+                            <h5 class="my-3">Verset du jour</h5>
+                            <div id="dailyVersesWrapper"></div>
+                            <script async defer src="https://dailyverses.net/get/verse.js?language=sg21"></script>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-10">
+                    <h2 class="add_new_group_title" style="text-align: center; color: white">
+                        Toutes les requetes
+                    </h2>
+                    <div id="container-blue" class="container-groups">
+
+                        {% for prais in prayers %}
+                                <div class="GROUPE" style="width: 40%; border-color: #0fd258">
+                                    <div class="millefeuille MF-top-part" style="display: flex; flex-direction: column;">
+                                        <div> {% if prais.owner.firstname %}{{ prais.owner.firstname ~' '~ prais.owner.lastname }}{% else %} {{ prais.owner.email }}{% endif %} </div>
+                                        <div class="MF-top-part-RIGHT">
+                                            <span class="material-icons" style="font-size: 20px;">place</span>
+                                            <div style="font-size: 10px;"> {% if prais.place %} {{prais.place.adress}} {% endif %}</div>
+                                            <span class="material-icons" style="font-size: 20px;">schedule</span>
+                                            <div style="font-size: 10px;"> {{ prais.createdAt|date }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="millefeuille MF-bottom-part">
+                                        <div class="MF-bottom-part75">
+
+                                            <div class="MF-bottom-part75-text">
+                                                {{ prais.description|raw }}
+                                            </div>
+                                        </div>
+                                        <div class="MF-bottom-part25">
+                                            {% if is_granted('IS_AUTHENTICATED_FULLY')%}
+                                                <div class="btn" style="width: 200px; height: 50px; text-transform: none; font-size: 12px; background-color: #0fd258;">
+                                                    <a href="#" data-href=" {{ path('prayer_membership_request', {'id': prais.id}) }}" class=" btn-subscription"> Je m'engage à prier</a>
+                                                    <div style="margin: 3px"> {{ prais.membership|length }}</div>
+                                                    <span class="material-icons">sign_language</span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+{#                                <div class="Card">#}
+{#                                    <div class="Card-image" {% if group.image %} style="background-image: url({{ asset('uploads/' ~ group.image.image) }});"{% endif %}></div>#}
+{#                                    <div class="Card-body">#}
+{#                                        <h1 class="Card-title">{{ group.title }}</h1>#}
+{#                                        <p class="Card-description">#}
+{#                                                                {{ group.description | raw }}#}
+{#                                            {{ group.description|striptags|slice(0, 40) }}#}
+{#                                        </p>#}
+{#                                        <div class="card-btn-container">#}
+{#                                            {% if not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}#}
+{#                                                <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class="btn btn-light btn-success btn-subscription"> Abonnez-vous</a>#}
+{#                                            {% endif %}#}
+{#                                            <a href=" {{ path('group_show', {'id': group.id}) }}" class="btn btn-secondary btn-subscription"> Accedez</a>#}
+{#                                        </div>#}
+{#                                                        <div class="card-footer text-muted">#}
+{#                                                            {{ group.owner.email }}#}
+{#                                                        </div>#}
+{#                                    </div>#}
+{#                                </div>#}
+
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            <div class="container">
+                <div class="row">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <a href="#" data-href="{{ path('group_list_page', {'page' : 2}) }}" class="button js-load-more" style="background-color: #0fd258; margin-top: 2em; width: 500px; height: 60px"> Plus de groupes</a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+    </section>
+
 {% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready(function (){
+            $(document).on('click','.btn-subscription', function (){
+                var url = $(this).attr("data-href");
+                fetch(url, {
+                    method: "POST",
+                    headers: {'Content-Type': 'application/json'},
+                }).then(res => {
+                    console.log("Request complete! response:", res);
+                });
+            });
+
+            mapboxgl.accessToken = 'pk.eyJ1IjoicHJlc2xleWRldiIsImEiOiJjbDZjaWxhMWUwNTJ6M2VxaXhxYWF4Z3h6In0.LM5TC2hXXpQUzk8fHrVyKg';
+            let map = new mapboxgl.Map({
+                container: 'map', // container ID
+                style: 'mapbox://styles/mapbox/streets-v11', // style URL
+                center: [-24, 42], // starting center in [lng, lat]
+                //zoom: 1, // starting zoom
+                projection: 'globe' // display map as a 3D globe
+            });
+
+            map.on('style.load', () => {
+                map.setFog({}); // Set the default atmosphere style
+            });
+
+            const geolocate =  new mapboxgl.GeolocateControl({
+                positionOptions: {
+                    enableHighAccuracy: true
+                },
+                // When active the map will receive updates to the device's location as it changes.
+                trackUserLocation: true,
+                // Draw an arrow next to the location dot to indicate which direction the device is heading.
+                showUserHeading: true
+            });
+            // Add geolocate control to the map.
+            map.addControl(geolocate);
+            map.on('load', function() {
+                geolocate.trigger();
+            });
+            geolocate.on('geolocate', function(e) {
+                map.flyTo({
+                    zoom: 15,
+                    center: [e.coords.longitude, e.coords.latitude]
+                });
+            });
+            {% for place in places %}
+                {% if place %}
+                    new mapboxgl.Marker().setLngLat(['{{ place.lng }}', '{{ place.lat }}']).addTo(map);
+                {% endif %}
+            {% endfor %}
+
+            $(document).on('click', '.js-load-more', function (e){
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                var url = $(this).attr("data-href");
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    success: function (data) {
+                        $(document).find('#container-blue').append(data.html)
+                        console.log(data.html);
+                        //$(document).find('.js-load-more').attr("data-href", "{{ path('group_list_page', {'page' : 'intToChange'}) }}");
+                        var newUrl = $(document).find('.js-load-more').attr("data-href").replace('intToChange', data.page);
+                        $(document).find('.js-load-more').attr("data-href", newUrl);
+                    }
+                });
+            });
+        })
+    </script>
+{% endblock %}
+

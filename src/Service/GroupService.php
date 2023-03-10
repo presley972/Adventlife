@@ -20,6 +20,7 @@ class GroupService
     public function getPaginatedGroups(){
 
         $request = $this->requestStack->getMainRequest();
+        //dd($request);
         $page = $request->query->getInt('page', 1);
         $limit = 5;
         $groupsQuery = $this->groupRepository->findForPagination();

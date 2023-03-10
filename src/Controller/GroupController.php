@@ -149,7 +149,7 @@ class GroupController extends AbstractController
     {
 
         $user = $this->getUser();
-        $member = $group->checkIfUserIsMember($user);
+        $member = $user ? $group->checkIfUserIsMember($user) : false;
 
         $events = $doctrine->getRepository(Evenement::class)->findByGroupAndMemberResultArray($group->getId(), $member);
         //
@@ -167,7 +167,8 @@ class GroupController extends AbstractController
         return $this->render('group/show.html.twig', [
             'group' => $group,
             'events' => $events,
-            'comments' => $comments
+            'comments' => $comments,
+            'member' => $member
         ]);
     }
 
@@ -578,7 +579,8 @@ class GroupController extends AbstractController
             return new JsonResponse([
                 'code' => 'success',
                 'url' => $this->generateUrl('group_show', [ 'id' => $group->getId()])
-            ]);        }
+            ]);
+        }
 
         return $this->renderForm('prayer/new.html.twig', [
             'prayer' => $prayer,
@@ -599,5 +601,14 @@ class GroupController extends AbstractController
             'prayers' => $prayers,
             'group' => $group
         ]);
+    }
+    #[Route('/group/search', name: 'group_search')]
+    public function searchGroup(Request $request, EntityManagerInterface $entityManager, PlaceRepository $placeRepository)
+    {
+        $places = $placeRepository->findPlacesForMapOnListGroup();
+
+        return $this->render('group/searchPage.html.twig', [
+            'places' => $places,
+            ]);
     }
 }

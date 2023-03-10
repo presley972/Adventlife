@@ -63,7 +63,7 @@
                                     <div class="btn">
                                         <a href=" {{ path('group_show', {'id': group.id}) }}"> voir</a>
                                     </div>
-                                    {% if not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
+                                    {% if is_granted('IS_AUTHENTICATED_FULLY') and not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
                                         <div class="btn">
                                             <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class=" btn-subscription"> Rejoindre ce groupe</a>
                                         </div>

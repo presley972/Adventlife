@@ -110,7 +110,14 @@
                 console.log('ici la mon gars');
                 var form = $(document).find('form')[0];
                 console.log(form)
+                {% if group is defined %}
                 var url = "{{ path('group_prayer_new', {'id': group.id}) }}";
+
+                {% else %}
+                var url = "{{ path('prayer_new') }}";
+
+                {% endif %}
+
                 var data = new FormData(form);
                 //var data = new form.serialize();
 

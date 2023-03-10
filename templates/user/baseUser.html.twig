@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}User{% endblock %}
+{% block navModul %}
+    <div class="MAIN-header-BOTTOM">
+        <div class="menuLink"><a href="{{ path('user_show',{'id': app.user.id}) }}"> Profile</a></div>
+        <div class="menuLink"><a href="{{ path('my_groups') }}"> Mes groupes</a></div>
+        <div class="menuLink"><a href="#"> messages</a></div>
+
+    </div>
+{% endblock %}

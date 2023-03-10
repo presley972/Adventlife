@@ -209,7 +209,7 @@
                             <div class="picto-img">
                                 <img src="{{ asset('uploads/icons8-prier-100.png') }}">
                             </div>
-                            <div class="picto-title menuLink"><a class="nav-link" href="#">Réseau de prière</a></div>
+                            <div class="picto-title menuLink"><a class="nav-link" href="{{path('prayer_index')}}">Réseau de prière</a></div>
                         </div>
 
                         <div class="MIDDLE-btnBox-container-picto">
@@ -232,7 +232,7 @@
                 <div class="MAIN-header-BOTTOM">
                     <div class="menuLink"><a href="{{ path('group_index') }}"> liste des groupes</a></div>
                     <div class="menuLink"><a href="{{ path('group_new') }}"> Créer un groupe</a></div>
-                    <div class="menuLink">trouver un groupe</div>
+                    <div class="menuLink"><a href="{{ path('group_search') }}"> trouver un groupe</a></div>
 
                 </div>
             {% endblock %}

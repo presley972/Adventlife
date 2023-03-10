@@ -21,7 +21,7 @@
 
                         {% set group = groups|first %}
 
-                        {% if not group.checkIfUserIsBlocked(app.user.id) %}
+                        {% if not is_granted('IS_AUTHENTICATED_FULLY') or not group.checkIfUserIsBlocked(app.user.id) %}
 
                             <div class="Card" style="margin-left: auto; margin-right: auto;">
                                 <div class="Card-image" {% if group.image %} style="background-image: url({{ asset('uploads/' ~ group.image.image) }});"{% endif %}></div>
@@ -69,7 +69,7 @@
                                                 <div class="btn">
                                                     <a href=" {{ path('group_show', {'id': group.id}) }}"> voir</a>
                                                 </div>
-                                                {% if not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
+                                                {% if is_granted('IS_AUTHENTICATED_FULLY') and not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
                                                     <div class="btn">
                                                         <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class=" btn-subscription"> Rejoindre ce groupe</a>
                                                     </div>
@@ -133,10 +133,10 @@
                     </div>
                 </div>
                 <div class="col-lg-10">
-                    <div class="container-groups">
+                    <div id="container-blue" class="container-groups">
 
                         {% for group in groups %}
-                            {% if not group.checkIfUserIsBlocked(app.user.id) %}
+                            {% if not is_granted('IS_AUTHENTICATED_FULLY') or not group.checkIfUserIsBlocked(app.user.id) %}
                                 <div class="GROUPE">
                                     <div class="millefeuille MF-top-part">
                                         <div class="MF-top-part-LEFT">
@@ -180,7 +180,7 @@
                                             <div class="btn">
                                                 <a href=" {{ path('group_show', {'id': group.id}) }}"> voir</a>
                                             </div>
-                                            {% if not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
+                                            {% if is_granted('IS_AUTHENTICATED_FULLY') and not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
                                                 <div class="btn">
                                                     <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class=" btn-subscription"> Rejoindre ce groupe</a>
                                                 </div>
@@ -217,13 +217,16 @@
             </div>
         </div>
 
-        <div class="container">
-            <div class="row">
-                <div class="d-flex align-items-center justify-content-center">
-                    <a href="#" data-href="{{ path('group_list_page', {'page' : 2}) }}" class="button js-load-more"> Plus de groupes</a>
+        {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+            <div class="container">
+                <div class="row">
+                    <div class="d-flex align-items-center justify-content-center">
+                        <a href="#" data-href="{{ path('group_list_page', {'page' : 2}) }}" class="button js-load-more"> Plus de groupes</a>
+                    </div>
                 </div>
             </div>
-        </div>
+        {% endif %}
+
     </section>
 
 {% endblock %}
@@ -281,7 +284,8 @@
                     type: "POST",
                     url: url,
                     success: function (data) {
-                        $(document).find('.container-groups').append(data.html)
+                        $(document).find('#container-blue').append(data.html)
+                        console.log(data.html);
                         $(document).find('.js-load-more').attr("data-href", "{{ path('group_list_page', {'page' : 'intToChange'}) }}");
                         var newUrl = $(document).find('.js-load-more').attr("data-href").replace('intToChange', data.page);
                         $(document).find('.js-load-more').attr("data-href", newUrl);

@@ -1,5 +1,5 @@
 {% for group in groups %}
-    {% if not group.checkIfUserIsBlocked(app.user.id) %}
+    {% if is_granted('IS_AUTHENTICATED_FULLY') and not group.checkIfUserIsBlocked(app.user.id) %}
         <div class="GROUPE">
             <div class="millefeuille MF-top-part">
                 <div class="MF-top-part-LEFT">
@@ -43,7 +43,7 @@
                     <div class="btn">
                         <a href=" {{ path('group_show', {'id': group.id}) }}"> voir</a>
                     </div>
-                    {% if not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
+                    {% if is_granted('IS_AUTHENTICATED_FULLY') and not group.checkIfUserIsSubcriber(app.user) and  group.owner is not same as(app.user)%}
                         <div class="btn">
                             <a href="#" data-href=" {{ path('subscribe_request', {'group': group.id}) }}" class=" btn-subscription"> Rejoindre ce groupe</a>
                         </div>
@@ -68,13 +68,7 @@
             </div>
         </div>#}
 
-        {% if group.place %}
-            <script>
-                new mapboxgl.Marker().setLngLat(['{{ group.place.lng }}', '{{ group.place.lat }}']).setPopup(new mapboxgl.Popup().setHTML("<h1>{{ group.place.adress }}</h1>")).addTo(map);
 
-            </script>
-
-        {% endif %}
 
 {% endfor %}
 

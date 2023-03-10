@@ -30,6 +30,16 @@ class PlaceRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+    public function findPlacesForMapOnListPrayer()
+    {
+        $qb = $this->createQueryBuilder('p');
+
+        $qb->select('p.Adress', 'p.id', 'p.lat', 'p.lng')
+            ->innerJoin('p.prayers','prayers')->addSelect('prayers.id as prayersId',  'prayers.description')
+        ;
+
+        return $qb->getQuery()->getResult();
+    }
     // /**
     //  * @return Place[] Returns an array of Place objects
     //  */

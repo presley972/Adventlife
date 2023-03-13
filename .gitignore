@@ -9,7 +9,6 @@
 /vendor/
 .idea
 /public/build
-.env
 ###< symfony/framework-bundle ###
 ###> symfony/webpack-encore-bundle ###
 /node_modules/

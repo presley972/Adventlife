@@ -9,14 +9,17 @@ use App\Form\User1Type;
 use App\Form\UserEditType;
 use App\Form\UserType;
 use App\Repository\UserRepository;
+use App\Security\EmailVerifier;
 use App\Service\FileUploader;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -24,6 +27,12 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 #[Route('/user')]
 class UserController extends AbstractController
 {
+    private EmailVerifier $emailVerifier;
+
+    public function __construct(EmailVerifier $emailVerifier)
+    {
+        $this->emailVerifier = $emailVerifier;
+    }
     #[Route('/', name: 'user_index', methods: ['GET'])]
     public function index(UserRepository $userRepository): Response
     {
@@ -151,13 +160,13 @@ class UserController extends AbstractController
                 $entityManager->flush();
 
                 // generate a signed url and email it to the user
-//                $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
-//                    (new TemplatedEmail())
-//                        ->from(new Address('presleylupon@gmail.com', 'Adventlife Mail Bot'))
-//                        ->to($user->getEmail())
-//                        ->subject('Please Confirm your Email')
-//                        ->htmlTemplate('registration/confirmation_email.html.twig')
-//                );
+                $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
+                    (new TemplatedEmail())
+                        ->from(new Address('contact@adventlife.life', 'Adventlife Mail Bot'))
+                        ->to($user->getEmail())
+                        ->subject('Please Confirm your Email')
+                        ->htmlTemplate('registration/confirmation_email.html.twig')
+                );
                 // do anything else you need here, like send an email
 
                 return $this->redirectToRoute('login');

@@ -16,4 +16,5 @@
 /public/uploads/
 npm-debug.log
 yarn-error.log
+doctrine.doctrine-bundle.updates-for-deleted-files.patch
 ###< symfony/webpack-encore-bundle ###

@@ -169,8 +169,10 @@ class UserController extends AbstractController
                 );
                 // do anything else you need here, like send an email
 
-                return $this->redirectToRoute('login');
-            }
+                return new JsonResponse([
+                    'code' => 'success',
+                    'urlRedirection' => $this->generateUrl('group_index')
+                ]);            }
             //dump($form->get('plainPassword')->getData());
 
             // ...

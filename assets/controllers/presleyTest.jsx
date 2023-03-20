@@ -81,7 +81,7 @@ class LoginComponent extends React.Component {
         axios.post(url, bodyFormData)
             .then(function (response) {
                 console.log(response);
-                window.location.href = 'https://localhost/groups';
+                window.location.href = response.data.urlRedirection ? response.data.urlRedirection : '/';
             })
             .catch(function (error) {
                 console.log(error);

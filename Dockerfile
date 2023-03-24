@@ -19,7 +19,20 @@ RUN apk add --no-cache \
 		git \
 		gnu-libiconv \
 	;
-RUN apk add --update nodejs npm
+
+ENV NVM_DIR /usr/local/nvm # or ~/.nvm , depending
+ENV NODE_VERSION 16.16.0
+
+# Install nvm with node and npm
+RUN curl https://raw.githubusercontent.com/creationix/nvm/v0.20.0/install.sh | bash \
+	&& . $NVM_DIR/nvm.sh \
+	&& nvm install $NODE_VERSION \
+	&& nvm alias default $NODE_VERSION \
+	&& nvm use default
+
+ENV NODE_PATH $NVM_DIR/v$NODE_VERSION/lib/node_modules
+ENV PATH      $NVM_DIR/v$NODE_VERSION/bin:$PATH
+#RUN apk add --update nodejs npm
 
 # install gnu-libiconv and set LD_PRELOAD env to make iconv work fully on Alpine image.
 # see https://github.com/docker-library/php/issues/240#issuecomment-763112749
